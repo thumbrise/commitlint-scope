@@ -2,17 +2,12 @@
 version: '3.17'
 
 tasks:
-  run:
-    desc: Run dev server
-    cmds:
-      - npm run dev
-
   lint:
-    desc: Run lint
+    desc: Lint
     cmds:
       - npm run lint
 
   build:
-    desc: Build for production
+    desc: Build
     cmds:
       - npm run build
