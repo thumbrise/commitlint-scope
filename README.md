@@ -1,20 +1,21 @@
-commitlint-scope
-=================
+# commitlint-scope
 
 A new CLI generated with oclif
-
 
 [![oclif](https://img.shields.io/badge/cli-oclif-brightgreen.svg)](https://oclif.io)
 [![Version](https://img.shields.io/npm/v/commitlint-scope.svg)](https://npmjs.org/package/commitlint-scope)
 [![Downloads/week](https://img.shields.io/npm/dw/commitlint-scope.svg)](https://npmjs.org/package/commitlint-scope)
 
-
 <!-- toc -->
-* [Usage](#usage)
-* [Commands](#commands)
+
+- [Usage](#usage)
+- [Commands](#commands)
 <!-- tocstop -->
+
 # Usage
+
 <!-- usage -->
+
 ```sh-session
 $ npm install -g commitlint-scope
 $ commitlint-scope COMMAND
@@ -26,22 +27,26 @@ USAGE
   $ commitlint-scope COMMAND
 ...
 ```
+
 <!-- usagestop -->
+
 # Commands
+
 <!-- commands -->
-* [`commitlint-scope hello PERSON`](#commitlint-scope-hello-person)
-* [`commitlint-scope hello world`](#commitlint-scope-hello-world)
-* [`commitlint-scope help [COMMAND]`](#commitlint-scope-help-command)
-* [`commitlint-scope plugins`](#commitlint-scope-plugins)
-* [`commitlint-scope plugins add PLUGIN`](#commitlint-scope-plugins-add-plugin)
-* [`commitlint-scope plugins:inspect PLUGIN...`](#commitlint-scope-pluginsinspect-plugin)
-* [`commitlint-scope plugins install PLUGIN`](#commitlint-scope-plugins-install-plugin)
-* [`commitlint-scope plugins link PATH`](#commitlint-scope-plugins-link-path)
-* [`commitlint-scope plugins remove [PLUGIN]`](#commitlint-scope-plugins-remove-plugin)
-* [`commitlint-scope plugins reset`](#commitlint-scope-plugins-reset)
-* [`commitlint-scope plugins uninstall [PLUGIN]`](#commitlint-scope-plugins-uninstall-plugin)
-* [`commitlint-scope plugins unlink [PLUGIN]`](#commitlint-scope-plugins-unlink-plugin)
-* [`commitlint-scope plugins update`](#commitlint-scope-plugins-update)
+
+- [`commitlint-scope hello PERSON`](#commitlint-scope-hello-person)
+- [`commitlint-scope hello world`](#commitlint-scope-hello-world)
+- [`commitlint-scope help [COMMAND]`](#commitlint-scope-help-command)
+- [`commitlint-scope plugins`](#commitlint-scope-plugins)
+- [`commitlint-scope plugins add PLUGIN`](#commitlint-scope-plugins-add-plugin)
+- [`commitlint-scope plugins:inspect PLUGIN...`](#commitlint-scope-pluginsinspect-plugin)
+- [`commitlint-scope plugins install PLUGIN`](#commitlint-scope-plugins-install-plugin)
+- [`commitlint-scope plugins link PATH`](#commitlint-scope-plugins-link-path)
+- [`commitlint-scope plugins remove [PLUGIN]`](#commitlint-scope-plugins-remove-plugin)
+- [`commitlint-scope plugins reset`](#commitlint-scope-plugins-reset)
+- [`commitlint-scope plugins uninstall [PLUGIN]`](#commitlint-scope-plugins-uninstall-plugin)
+- [`commitlint-scope plugins unlink [PLUGIN]`](#commitlint-scope-plugins-unlink-plugin)
+- [`commitlint-scope plugins update`](#commitlint-scope-plugins-update)
 
 ## `commitlint-scope hello PERSON`
 
@@ -394,4 +399,5 @@ DESCRIPTION
 ```
 
 _See code: [@oclif/plugin-plugins](https://github.com/oclif/plugin-plugins/blob/5.4.69/src/commands/plugins/update.ts)_
+
 <!-- commandsstop -->
