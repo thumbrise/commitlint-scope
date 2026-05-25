@@ -1,0 +1,18 @@
+#schema: https://taskfile.dev/schema.json
+version: '3.17'
+
+tasks:
+  run:
+    desc: Run dev server
+    cmds:
+      - npm run dev
+
+  lint:
+    desc: Run lint
+    cmds:
+      - npm run lint
+
+  build:
+    desc: Build for production
+    cmds:
+      - npm run build
