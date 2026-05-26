@@ -2,6 +2,13 @@
 version: '3.17'
 
 tasks:
+  run:
+    desc: Run
+    deps:
+      - task: build
+    cmds:
+      - ./bin/dev.js {{.CLI_ARGS}}
+
   lint:
     desc: Lint
     cmds:
@@ -11,3 +18,5 @@ tasks:
     desc: Build
     cmds:
       - npm run build
+    generates:
+      - ./bin/**
