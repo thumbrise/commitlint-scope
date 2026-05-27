@@ -27,6 +27,22 @@ func NewValidator(
 	scopeParser ScopeParser,
 	shaLength int,
 ) *Validator {
+	if logger == nil {
+		logger = slog.Default()
+	}
+
+	if git == nil {
+		panic("git must not be nil")
+	}
+
+	if outsiderFinder == nil {
+		panic("outsiderFinder must not be nil")
+	}
+
+	if scopeParser == nil {
+		panic("scopeParser must not be nil")
+	}
+
 	if shaLength < 1 {
 		panic("shaLength must be greater than or equal to 1")
 	}
