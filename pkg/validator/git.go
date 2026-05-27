@@ -50,7 +50,7 @@ func (d *DefaultGit) FilesChanged(ctx context.Context, sha string) ([]string, er
 }
 
 func (d *DefaultGit) gitCommand(ctx context.Context, args ...string) *exec.Cmd {
-	//nolint:gosec // no another way
+	//nolint:gosec // no other way
 	cmd := exec.CommandContext(ctx, "git", args...)
 	if d.dir != "" {
 		cmd.Dir = d.dir
