@@ -65,7 +65,7 @@ Examples:
 			return nil
 		}
 
-		encoder := json.NewEncoder(cmd.ErrWriter)
+		encoder := json.NewEncoder(cmd.Writer)
 		encoder.SetIndent("", "  ")
 
 		for _, v := range violations {
