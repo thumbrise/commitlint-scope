@@ -30,6 +30,7 @@ func NewValidator(
 	if shaLength < 1 {
 		panic("shaLength must be greater than or equal to 1")
 	}
+
 	return &Validator{
 		logger:         logger,
 		git:            git,
@@ -40,7 +41,6 @@ func NewValidator(
 }
 
 func (v *Validator) Validate(ctx context.Context, from, to string) ([]Violation, error) {
-
 	shas, err := v.git.SHA(ctx, from, to)
 	if err != nil {
 		return nil, fmt.Errorf("git sha: %w", err)
