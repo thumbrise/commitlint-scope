@@ -104,6 +104,7 @@ linters:
           - errcheck
           - gocyclo
           - gosec
+          - funlen
         path: _test\.go
       - linters:
           - gochecknoinits
