@@ -96,8 +96,13 @@ func (v *Validator) Validate(ctx context.Context, from, to string) ([]Violation,
 
 		outsiders := v.outsiderFinder.Find(scope, files)
 		if len(outsiders) > 0 {
+			truncatedSHA := sha
+			if len(truncatedSHA) > v.shaLength {
+				truncatedSHA = truncatedSHA[:v.shaLength]
+			}
+
 			violations = append(violations, Violation{
-				SHA:       sha[:v.shaLength],
+				SHA:       truncatedSHA,
 				Header:    message,
 				Outsiders: outsiders,
 			})
