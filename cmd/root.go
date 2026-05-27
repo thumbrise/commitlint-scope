@@ -4,8 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"os"
+	"log/slog"
 
+	"github.com/thumbrise/commitlint-scope/pkg/validator"
 	"github.com/urfave/cli/v3"
 )
 
@@ -13,19 +14,6 @@ var (
 	from string
 	to   string
 )
-
-// Violation represents a single scope violation found in a commit.
-type Violation struct {
-	SHA       string   `json:"sha"`
-	Header    string   `json:"header"`
-	Outsiders []string `json:"outsiders"`
-}
-
-// ScopeValidator defines the contract for validating commit scopes.
-// Implement this interface with your business logic.
-type ScopeValidator interface {
-	Validate(ctx context.Context, from, to string) ([]Violation, error)
-}
 
 // Root is the entry point command for commitlint-scope.
 var Root = &cli.Command{
@@ -60,22 +48,9 @@ Examples:
 	},
 
 	Action: func(ctx context.Context, cmd *cli.Command) error {
-		//nolint:godox // Need
-		// TODO: Replace the following line with your real validator initialization.
-		//  Example:
-		//    validator := myvalidator.New(git.New(), parser.New())
-		var validator ScopeValidator
+		vld := validator.NewValidator(slog.Default(), nil, nil, nil, 7)
 
-		//nolint:godox // Need
-		// TODO: Instantiate implementation of ScopeValidator here.
-		//   validator = yourpkg.NewValidator(...)
-		if validator == nil {
-			fmt.Println("Validator not yet implemented. Please initialize the ScopeValidator in cmd/root.go")
-
-			return nil
-		}
-
-		violations, err := validator.Validate(ctx, from, to)
+		violations, err := vld.Validate(ctx, from, to)
 		if err != nil {
 			return fmt.Errorf("validation failed: %w", err)
 		}
@@ -84,7 +59,7 @@ Examples:
 			return nil
 		}
 
-		encoder := json.NewEncoder(os.Stdout)
+		encoder := json.NewEncoder(cmd.ErrWriter)
 		encoder.SetIndent("", "  ")
 
 		for _, v := range violations {
