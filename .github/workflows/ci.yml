@@ -59,5 +59,3 @@ jobs:
       - name: Validate PR commits with commitlint
         run: npx commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose
 
-      - name: Install scope tool dependencies
-        run: npm ci --prefix tools/scope-path
