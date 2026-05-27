@@ -11,3 +11,16 @@ tasks:
     desc: Run lint with auto-fix where possible (dev workflow)
     cmds:
       - golangci-lint run --fix
+
+  test:
+    desc: Run tests
+    cmds:
+      - go test ./... -v
+      - go test ./... -v -run=NONE -bench=. -benchmem
+
+  generate:
+    desc: Generate
+    aliases:
+      - gen
+    cmds:
+      - go tool mockery
