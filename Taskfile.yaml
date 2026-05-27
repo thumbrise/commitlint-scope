@@ -3,7 +3,7 @@ version: '3.17'
 
 tasks:
   run:
-    desc: Run app
+    desc: Run
     cmds:
       - go run .
 

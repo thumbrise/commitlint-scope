@@ -121,6 +121,7 @@ linters:
       - third_party$
       - builtin$
       - examples$
+      - legacy
 issues:
   whole-files: true
   fix: true
