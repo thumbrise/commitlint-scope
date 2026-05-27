@@ -14,70 +14,59 @@
  * limitations under the License.
  */
 
-const fs = require('node:fs')
-const path = require('node:path')
+const fs = require('fs');
+const path = require('path');
 
-const commitPartial = fs.readFileSync(path.join(__dirname, 'release-template.hbs'), 'utf8')
+const commitPartial = fs.readFileSync(
+    path.join(__dirname, 'release-template.hbs'),
+    'utf8'
+);
 
 module.exports = {
-  branches: ['main'],
-  plugins: [
-    [
-      '@semantic-release/commit-analyzer',
-      {
-        preset: 'conventionalcommits',
-      },
-    ],
-    [
-      '@semantic-release/release-notes-generator',
-      {
-        parserOpts: {
-          noteKeywords: ['BREAKING CHANGE', 'BREAKING CHANGES', 'BREAKING', '!'],
-        },
-        preset: 'conventionalcommits',
-        presetConfig: {
-          types: [
-            { section: 'Features', type: 'feat' },
-            { section: 'Bug Fixes', type: 'fix' },
-            { section: 'CI/CD', type: 'ci' },
-            { section: 'Tests', type: 'test' },
-            { section: 'Reverts', type: 'revert' },
-            { section: 'Build System', type: 'build' },
-            { section: 'Code Refactoring', type: 'refactor' },
-            { section: 'Code Refactoring', type: 'style' },
-            { section: 'Performance Improvements', type: 'perf' },
-            { section: 'Documentation', type: 'docs' },
-            { section: 'Internal Changes', type: 'chore' },
-          ],
-        },
-        writerOpts: {
-          bodyWrap: 100,
-          commitPartial,
-          commitsSort: ['scope', 'subject'],
-          includeDetails: true,
-          showBody: true,
-        },
-      },
-    ],
-    [
-      '@semantic-release/exec',
-      {
-        prepareCmd: 'npm run version',
-      },
-    ],
-    [
-      '@semantic-release/npm',
-      {
-        npmPublish: false,
-      },
-    ],
-    [
-      '@semantic-release/git',
-      {
-        assets: ['package.json', 'README.md'],
-        message: 'chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}',
-      },
-    ],
-    '@semantic-release/github',
-  ],
-}
+    branches: ['main'],
+    plugins: [
+        [
+            '@semantic-release/commit-analyzer',
+            {
+                preset: 'conventionalcommits',
+            }
+        ],
+        [
+            '@semantic-release/release-notes-generator',
+            {
+                preset: 'conventionalcommits',
+                presetConfig: {
+                    types: [
+                        {type: 'feat', section: 'Features'},
+                        {type: 'fix', section: 'Bug Fixes'},
+                        {type: 'ci', section: 'CI/CD'},
+                        {type: 'test', section: 'Tests'},
+                        {type: 'revert', section: 'Reverts'},
+                        {type: 'build', section: 'Build System'},
+                        {type: 'refactor', section: 'Code Refactoring'},
+                        {type: 'style', section: 'Code Refactoring'},
+                        {type: 'perf', section: 'Performance Improvements'},
+                        {type: 'docs', section: 'Documentation'},
+                        {type: 'chore', section: 'Internal Changes'},
+                    ],
+                },
+                parserOpts: {
+                    noteKeywords: [
+                        'BREAKING CHANGE',
+                        'BREAKING CHANGES',
+                        'BREAKING',
+                        '!'
+                    ],
+                },
+                writerOpts: {
+                    commitPartial,
+                    commitsSort: ['scope', 'subject'],
+                    includeDetails: true,
+                    showBody: true,
+                    bodyWrap: 100
+                }
+            }
+        ],
+        '@semantic-release/github'
+    ]
+};

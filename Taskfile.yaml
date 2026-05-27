@@ -3,20 +3,11 @@ version: '3.17'
 
 tasks:
   run:
-    desc: Run
-    deps:
-      - task: build
+    desc: Run app
     cmds:
-      - ./bin/dev.js {{.CLI_ARGS}}
+      - go run .
 
   lint:
-    desc: Lint
+    desc: Run lint with auto-fix where possible (dev workflow)
     cmds:
-      - npm run lint
-
-  build:
-    desc: Build
-    cmds:
-      - npm run build
-    generates:
-      - ./bin/**
+      - golangci-lint run --fix

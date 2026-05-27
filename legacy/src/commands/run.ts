@@ -1,4 +1,6 @@
-import { Command, Flags } from '@oclif/core'
+import {Command, Flags} from '@oclif/core'
+import container from "../container.js";
+import Validator from "../validator/index.js";
 
 export default class Run extends Command {
   static args = {}
@@ -23,8 +25,13 @@ export default class Run extends Command {
   }
 
   async run(): Promise<void> {
-    const { args, flags } = await this.parse(Run)
+    const {flags} = await this.parse(Run)
+    const validator = container.get<Validator>()
+    const violations = await validator.validate(flags.from, flags.to)
 
-    this.log(`hello ${args.person} from ${flags.from}! (./src/commands/hello/index.ts)`)
+    violations.forEach(violation => {
+      this.log(JSON.stringify(violation))
+      this.log("\n")
+    })
   }
 }
