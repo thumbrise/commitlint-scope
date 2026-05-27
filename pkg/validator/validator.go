@@ -12,6 +12,30 @@ var (
 	ErrGetChangedFiles = errors.New("get changed files")
 )
 
+type Violation struct {
+	SHA       string   `json:"sha"`
+	Header    string   `json:"header"`
+	Outsiders []string `json:"outsiders"`
+}
+type Git interface {
+	SHA(ctx context.Context, from, to string) ([]string, error)
+	Message(ctx context.Context, sha string) (string, error)
+	FilesChanged(ctx context.Context, sha string) ([]string, error)
+}
+type ScopeParser interface {
+	Parse(message string) (string, bool) // scope, ok
+}
+type OutsiderFinder interface {
+	Find(scope string, files []string) []string
+}
+
+type Options struct {
+	Logger         *slog.Logger
+	SHALength      int
+	Git            Git
+	OutsiderFinder OutsiderFinder
+	ScopeParser    ScopeParser
+}
 type Validator struct {
 	logger         *slog.Logger
 	git            Git
@@ -20,31 +44,35 @@ type Validator struct {
 	shaLength      int
 }
 
-func NewValidator(
-	logger *slog.Logger,
-	git Git,
-	outsiderFinder OutsiderFinder,
-	scopeParser ScopeParser,
-	shaLength int,
-) *Validator {
+func NewValidator(options Options) *Validator {
+	logger := options.Logger
+	shaLength := options.SHALength
+	scopeParser := options.ScopeParser
+	outsiderFinder := options.OutsiderFinder
+	git := options.Git
+
 	if logger == nil {
 		logger = slog.Default()
 	}
 
 	if git == nil {
-		panic("git must not be nil")
+		git = NewDefaultGit("")
 	}
 
 	if outsiderFinder == nil {
-		panic("outsiderFinder must not be nil")
+		panic("OutsiderFinder must not be nil")
 	}
 
 	if scopeParser == nil {
-		panic("scopeParser must not be nil")
+		panic("ScopeParser must not be nil")
 	}
 
-	if shaLength < 1 {
-		panic("shaLength must be greater than or equal to 1")
+	if shaLength == 0 {
+		shaLength = 7
+	}
+
+	if shaLength < 0 {
+		panic("ShaLength must be greater than 0")
 	}
 
 	return &Validator{

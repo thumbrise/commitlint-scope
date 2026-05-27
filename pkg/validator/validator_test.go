@@ -47,7 +47,13 @@ func TestValidator_OneViolation(t *testing.T) {
 
 	const shaLength = 7
 
-	v := validator.NewValidator(logger, git, outsider, parser, shaLength)
+	v := validator.NewValidator(validator.Options{
+		Logger:         logger,
+		SHALength:      shaLength,
+		Git:            git,
+		OutsiderFinder: outsider,
+		ScopeParser:    parser,
+	})
 
 	violations, err := v.Validate(context.Background(), "main", "feature-branch")
 	if err != nil {
@@ -126,7 +132,13 @@ func TestValidator_Scenarios(t *testing.T) {
 
 			SetupExpectations(t, tt.commits, git, parser, outsider)
 
-			v := validator.NewValidator(logger, git, outsider, parser, shaLength)
+			v := validator.NewValidator(validator.Options{
+				Logger:         logger,
+				SHALength:      shaLength,
+				Git:            git,
+				OutsiderFinder: outsider,
+				ScopeParser:    parser,
+			})
 			violations, err := v.Validate(context.Background(), "main", "feature-branch")
 
 			if tt.wantErr && err == nil {

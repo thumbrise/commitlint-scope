@@ -48,7 +48,13 @@ Examples:
 	},
 
 	Action: func(ctx context.Context, cmd *cli.Command) error {
-		vld := validator.NewValidator(slog.Default(), nil, nil, nil, 7)
+		vld := validator.NewValidator(validator.Options{
+			Logger:         slog.Default(),
+			SHALength:      7,
+			Git:            nil,
+			OutsiderFinder: nil,
+			ScopeParser:    nil,
+		})
 
 		violations, err := vld.Validate(ctx, from, to)
 		if err != nil {
