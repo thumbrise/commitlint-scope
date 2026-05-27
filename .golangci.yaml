@@ -3,7 +3,6 @@ run:
   allow-parallel-runners: true
   allow-serial-runners: true
 output:
-  path-prefix: services/billing
   formats:
     text:
       path: stderr
