@@ -11,11 +11,11 @@ import (
 )
 
 type TestableCommit struct {
-	sha, message string
-	files        []string
-	scope        string
-	outsiders    []string
-	messageErr   error
+	sha, message   string
+	files          []string
+	scope          string
+	outsidersFiles []string
+	messageErr     error
 }
 
 func TestValidator_OneViolation(t *testing.T) {
@@ -30,12 +30,12 @@ func TestValidator_OneViolation(t *testing.T) {
 	filesChanged := []string{"core/other.go"}
 	commits := []TestableCommit{
 		{
-			sha:        commitSHA,
-			message:    commitMessage,
-			files:      filesChanged,
-			scope:      commitScope,
-			outsiders:  filesChanged,
-			messageErr: nil,
+			sha:            commitSHA,
+			message:        commitMessage,
+			files:          filesChanged,
+			scope:          commitScope,
+			outsidersFiles: filesChanged,
+			messageErr:     nil,
 		},
 	}
 
@@ -47,13 +47,15 @@ func TestValidator_OneViolation(t *testing.T) {
 
 	const shaLength = 7
 
-	v := validator.NewValidator(validator.Options{
-		Logger:         logger,
-		SHALength:      shaLength,
-		Git:            git,
-		OutsiderFinder: outsider,
-		ScopeParser:    parser,
-	})
+	v := validator.NewValidator(
+		validator.Config{},
+		validator.Options{
+			Logger:         logger,
+			SHALength:      shaLength,
+			Git:            git,
+			OutsiderFinder: outsider,
+			ScopeParser:    parser,
+		})
 
 	violations, err := v.Validate(context.Background(), "main", "feature-branch")
 	if err != nil {
@@ -91,7 +93,7 @@ func TestValidator_Scenarios(t *testing.T) {
 			},
 		},
 		{
-			name: "TestableCommit with scope and no outsiders",
+			name: "TestableCommit with scope and no outsidersFiles",
 			commits: []TestableCommit{
 				{sha: "bbb2222bbb", message: "feat(api): add endpoint", files: []string{"api/handler.go"}, scope: "api"},
 			},
@@ -99,7 +101,7 @@ func TestValidator_Scenarios(t *testing.T) {
 		{
 			name: "TestableCommit with outsider file",
 			commits: []TestableCommit{
-				{sha: "ccc3333ccc", message: "fix(auth): token", files: []string{"auth/service.go", "api/handler.go"}, scope: "auth", outsiders: []string{"api/handler.go"}},
+				{sha: "ccc3333ccc", message: "fix(auth): token", files: []string{"auth/service.go", "api/handler.go"}, scope: "auth", outsidersFiles: []string{"api/handler.go"}},
 			},
 			wantViolations: 1,
 		},
@@ -132,13 +134,15 @@ func TestValidator_Scenarios(t *testing.T) {
 
 			SetupExpectations(t, tt.commits, git, parser, outsider)
 
-			v := validator.NewValidator(validator.Options{
-				Logger:         logger,
-				SHALength:      shaLength,
-				Git:            git,
-				OutsiderFinder: outsider,
-				ScopeParser:    parser,
-			})
+			v := validator.NewValidator(
+				validator.Config{},
+				validator.Options{
+					Logger:         logger,
+					SHALength:      shaLength,
+					Git:            git,
+					OutsiderFinder: outsider,
+					ScopeParser:    parser,
+				})
 			violations, err := v.Validate(context.Background(), "main", "feature-branch")
 
 			if tt.wantErr && err == nil {
@@ -180,9 +184,9 @@ func SetupExpectations(t *testing.T, commits []TestableCommit, git *validator.Mo
 		}
 
 		if c.scope != "" {
-			parser.EXPECT().Parse(c.message).Return(c.scope, true)
+			parser.EXPECT().Parse(c.message).Return(c.scope)
 		} else {
-			parser.EXPECT().Parse(c.message).Return("", false)
+			parser.EXPECT().Parse(c.message).Return("")
 
 			continue
 		}
@@ -193,6 +197,14 @@ func SetupExpectations(t *testing.T, commits []TestableCommit, git *validator.Mo
 			continue
 		}
 
-		outsider.EXPECT().Find(c.scope, c.files).Return(c.outsiders)
+		outsiders := make([]validator.Outsider, len(c.outsidersFiles))
+		for i, outsiderFile := range c.outsidersFiles {
+			outsiders[i] = validator.Outsider{
+				File:              outsiderFile,
+				UnmatchedPatterns: nil,
+			}
+		}
+
+		outsider.EXPECT().Find(c.scope, c.files).Return(outsiders)
 	}
 }

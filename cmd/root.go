@@ -48,7 +48,12 @@ Examples:
 	},
 
 	Action: func(ctx context.Context, cmd *cli.Command) error {
-		vld := validator.NewValidator(validator.Options{
+		cfg, err := validator.LoadConfig()
+		if err != nil {
+			return fmt.Errorf("loading config: %w", err)
+		}
+
+		vld := validator.NewValidator(cfg, validator.Options{
 			Logger:         slog.Default(),
 			SHALength:      7,
 			Git:            nil,
