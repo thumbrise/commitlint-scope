@@ -273,7 +273,7 @@ func (_m *MockScopeParser) EXPECT() *MockScopeParser_Expecter {
 }
 
 // Parse provides a mock function for the type MockScopeParser
-func (_mock *MockScopeParser) Parse(message string) (string, bool) {
+func (_mock *MockScopeParser) Parse(message string) string {
 	ret := _mock.Called(message)
 
 	if len(ret) == 0 {
@@ -281,21 +281,12 @@ func (_mock *MockScopeParser) Parse(message string) (string, bool) {
 	}
 
 	var r0 string
-	var r1 bool
-	if returnFunc, ok := ret.Get(0).(func(string) (string, bool)); ok {
-		return returnFunc(message)
-	}
 	if returnFunc, ok := ret.Get(0).(func(string) string); ok {
 		r0 = returnFunc(message)
 	} else {
 		r0 = ret.Get(0).(string)
 	}
-	if returnFunc, ok := ret.Get(1).(func(string) bool); ok {
-		r1 = returnFunc(message)
-	} else {
-		r1 = ret.Get(1).(bool)
-	}
-	return r0, r1
+	return r0
 }
 
 // MockScopeParser_Parse_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Parse'
@@ -322,12 +313,12 @@ func (_c *MockScopeParser_Parse_Call) Run(run func(message string)) *MockScopePa
 	return _c
 }
 
-func (_c *MockScopeParser_Parse_Call) Return(s string, b bool) *MockScopeParser_Parse_Call {
-	_c.Call.Return(s, b)
+func (_c *MockScopeParser_Parse_Call) Return(s string) *MockScopeParser_Parse_Call {
+	_c.Call.Return(s)
 	return _c
 }
 
-func (_c *MockScopeParser_Parse_Call) RunAndReturn(run func(message string) (string, bool)) *MockScopeParser_Parse_Call {
+func (_c *MockScopeParser_Parse_Call) RunAndReturn(run func(message string) string) *MockScopeParser_Parse_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -360,19 +351,19 @@ func (_m *MockOutsiderFinder) EXPECT() *MockOutsiderFinder_Expecter {
 }
 
 // Find provides a mock function for the type MockOutsiderFinder
-func (_mock *MockOutsiderFinder) Find(scope string, files []string) []string {
+func (_mock *MockOutsiderFinder) Find(scope string, files []string) []Outsider {
 	ret := _mock.Called(scope, files)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Find")
 	}
 
-	var r0 []string
-	if returnFunc, ok := ret.Get(0).(func(string, []string) []string); ok {
+	var r0 []Outsider
+	if returnFunc, ok := ret.Get(0).(func(string, []string) []Outsider); ok {
 		r0 = returnFunc(scope, files)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]string)
+			r0 = ret.Get(0).([]Outsider)
 		}
 	}
 	return r0
@@ -408,12 +399,12 @@ func (_c *MockOutsiderFinder_Find_Call) Run(run func(scope string, files []strin
 	return _c
 }
 
-func (_c *MockOutsiderFinder_Find_Call) Return(strings []string) *MockOutsiderFinder_Find_Call {
-	_c.Call.Return(strings)
+func (_c *MockOutsiderFinder_Find_Call) Return(outsiders []Outsider) *MockOutsiderFinder_Find_Call {
+	_c.Call.Return(outsiders)
 	return _c
 }
 
-func (_c *MockOutsiderFinder_Find_Call) RunAndReturn(run func(scope string, files []string) []string) *MockOutsiderFinder_Find_Call {
+func (_c *MockOutsiderFinder_Find_Call) RunAndReturn(run func(scope string, files []string) []Outsider) *MockOutsiderFinder_Find_Call {
 	_c.Call.Return(run)
 	return _c
 }

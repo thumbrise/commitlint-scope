@@ -13,9 +13,9 @@ var (
 )
 
 type Violation struct {
-	SHA       string   `json:"sha"`
-	Header    string   `json:"header"`
-	Outsiders []string `json:"outsiders"`
+	SHA       string     `json:"sha"`
+	Header    string     `json:"header"`
+	Outsiders []Outsider `json:"outsiders"`
 }
 type Git interface {
 	SHA(ctx context.Context, from, to string) ([]string, error)
@@ -23,10 +23,10 @@ type Git interface {
 	FilesChanged(ctx context.Context, sha string) ([]string, error)
 }
 type ScopeParser interface {
-	Parse(message string) (string, bool) // scope, ok
+	Parse(message string) string
 }
 type OutsiderFinder interface {
-	Find(scope string, files []string) []string
+	Find(scope string, files []string) []Outsider
 }
 
 type Options struct {
@@ -44,7 +44,7 @@ type Validator struct {
 	shaLength      int
 }
 
-func NewValidator(options Options) *Validator {
+func NewValidator(cfg Config, options Options) *Validator {
 	logger := options.Logger
 	shaLength := options.SHALength
 	scopeParser := options.ScopeParser
@@ -60,11 +60,11 @@ func NewValidator(options Options) *Validator {
 	}
 
 	if outsiderFinder == nil {
-		panic("OutsiderFinder must not be nil")
+		outsiderFinder = NewDefaultOutsiderFinder(cfg.Patterns)
 	}
 
 	if scopeParser == nil {
-		panic("ScopeParser must not be nil")
+		scopeParser = NewDefaultScopeParser(cfg.ScopeRegex)
 	}
 
 	if shaLength == 0 {
@@ -104,8 +104,8 @@ func (v *Validator) Validate(ctx context.Context, from, to string) ([]Violation,
 			continue
 		}
 
-		scope, ok := v.scopeParser.Parse(message)
-		if !ok {
+		scope := v.scopeParser.Parse(message)
+		if scope == "" {
 			v.logger.Info("no scope, skip", "sha", sha, "message", message)
 
 			continue
