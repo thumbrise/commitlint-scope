@@ -8,8 +8,6 @@ import (
 )
 
 func TestDefaultScopeParser_Parse(t *testing.T) {
-	compile := regexp.MustCompile
-
 	tests := []struct {
 		name    string
 		regex   *regexp.Regexp
@@ -17,13 +15,14 @@ func TestDefaultScopeParser_Parse(t *testing.T) {
 		want    string
 	}{
 		{name: "nil regex", regex: nil, message: "feat(api): add", want: ""},
-		{name: "no match", regex: compile(`^feat\((?P<scope>[^)]+)\)`), message: "fix(api): bug", want: ""},
-		{name: "match with scope", regex: compile(`^[a-z]+(?:\((?P<scope>[^)]+)\))?!?:\s`), message: "feat(api): add endpoint", want: "api"},
-		{name: "no scope in message", regex: compile(`^[a-z]+(?:\((?P<scope>[^)]+)\))?!?:\s`), message: "chore: update deps", want: ""},
-		{name: "regex without named group scope", regex: compile(`^[a-z]+(?:\(([^)]+)\))?!?:\s`), message: "feat(api): add", want: ""},
-		{name: "scope with breaking change (!)", regex: compile(`^[a-z]+(?:\((?P<scope>[^)]+)\))?!?:\s`), message: "fix(auth)!: correct token", want: "auth"},
-		{name: "multiple matches, returns first", regex: compile(`(?P<scope>[a-z]+)`), message: "api handler", want: "api"},
-		{name: "empty scope in parentheses", regex: compile(`^feat\((?P<scope>[^)]*)\)`), message: "feat(): empty", want: ""},
+		{name: "no match", regex: regexp.MustCompile(`^feat\((?P<scope>[^)]+)\)`), message: "fix(api): bug", want: ""},
+		{name: "match with scope", regex: regexp.MustCompile(`^[a-z]+(?:\((?P<scope>[^)]+)\))?!?:\s`), message: "feat(api): add endpoint", want: "api"},
+		{name: "no scope in message", regex: regexp.MustCompile(`^[a-z]+(?:\((?P<scope>[^)]+)\))?!?:\s`), message: "chore: update deps", want: ""},
+		{name: "regex without named group scope", regex: regexp.MustCompile(`^[a-z]+(?:\(([^)]+)\))?!?:\s`), message: "feat(api): add", want: ""},
+		{name: "scope with breaking change (!)", regex: regexp.MustCompile(`^[a-z]+(?:\((?P<scope>[^)]+)\))?!?:\s`), message: "fix(auth)!: correct token", want: "auth"},
+		{name: "multiple matches, returns first", regex: regexp.MustCompile(`(?P<scope>[a-z]+)`), message: "api handler", want: "api"},
+		{name: "empty scope in parentheses", regex: regexp.MustCompile(`^feat\((?P<scope>[^)]*)\)`), message: "feat(): empty", want: ""},
+		{name: "composed scope", regex: regexp.MustCompile(`^[a-z]+(?:\((?P<scope>[^)]+)\))?!?:\s`), message: "style(services,frontend): Add linters and formatters, format whole frontend", want: "services,frontend"},
 	}
 
 	for _, tt := range tests {
