@@ -19,7 +19,6 @@ func TestDefaultScopeParser_Parse(t *testing.T) {
 		{name: "nil regex", regex: nil, message: "feat(api): add", want: ""},
 		{name: "no match", regex: compile(`^feat\((?P<scope>[^)]+)\)`), message: "fix(api): bug", want: ""},
 		{name: "match with scope", regex: compile(`^[a-z]+(?:\((?P<scope>[^)]+)\))?!?:\s`), message: "feat(api): add endpoint", want: "api"},
-		{name: "match with scope", regex: compile(`^[a-z]+(?:\((?P<scope>[^)]+)\))?!?:\s`), message: "feat(api): add endpoint", want: "api"},
 		{name: "no scope in message", regex: compile(`^[a-z]+(?:\((?P<scope>[^)]+)\))?!?:\s`), message: "chore: update deps", want: ""},
 		{name: "regex without named group scope", regex: compile(`^[a-z]+(?:\(([^)]+)\))?!?:\s`), message: "feat(api): add", want: ""},
 		{name: "scope with breaking change (!)", regex: compile(`^[a-z]+(?:\((?P<scope>[^)]+)\))?!?:\s`), message: "fix(auth)!: correct token", want: "auth"},
