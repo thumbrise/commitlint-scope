@@ -64,9 +64,11 @@ patterns:
 			origDir, err := os.Getwd()
 			require.NoError(t, err)
 
-			defer os.Chdir(origDir)
+			t.Cleanup(func() {
+				require.NoError(t, os.Chdir(origDir))
+			})
 
-			os.Chdir(dir)
+			require.NoError(t, os.Chdir(dir))
 
 			if tt.yaml != "" {
 				err = os.WriteFile(filepath.Join(dir, ".commitlint-scope.yaml"), []byte(tt.yaml), 0o644)
