@@ -34,7 +34,7 @@ func LoadConfig() (Config, error) {
 	}
 
 	if err := v.Unmarshal(&cfg, regexDecode); err != nil {
-		return Config{}, err
+		return Config{}, fmt.Errorf("%w: %w", ErrConfigRead, err)
 	}
 
 	return cfg, nil
