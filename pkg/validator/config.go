@@ -1,6 +1,7 @@
 package validator
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 	"regexp"
@@ -39,12 +40,14 @@ func LoadConfig() (Config, error) {
 	return cfg, nil
 }
 
+var ErrRegexDecode = errors.New("expected string for regexp decode")
+
 func regexDecode(cfg *mapstructure.DecoderConfig) {
 	cfg.DecodeHook = func(from reflect.Type, to reflect.Type, data interface{}) (interface{}, error) {
 		if from.Kind() == reflect.String && to == reflect.TypeOf(&regexp.Regexp{}) {
 			val, ok := data.(string)
 			if !ok {
-				panic(fmt.Sprintf("expected string but got %T", data))
+				return nil, fmt.Errorf("%w got %T", ErrRegexDecode, data)
 			}
 
 			return regexp.Compile(val)
