@@ -4,15 +4,21 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log/slog"
+	"os"
 
+	"github.com/fatih/color"
 	"github.com/thumbrise/commitlint-scope/pkg/validator"
 	"github.com/urfave/cli/v3"
 )
 
 var (
-	from string
-	to   string
+	flagFrom    string
+	flagTo      string
+	flagVerbose bool
+	flagNoColor bool
+	flagJSON    bool
 )
 
 // Root is the entry point command for commitlint-scope.
@@ -36,18 +42,41 @@ Examples:
 			Aliases:     []string{"f"},
 			Usage:       "Start of the commit range (exclusive)",
 			Required:    true,
-			Destination: &from,
+			Destination: &flagFrom,
 		},
 		&cli.StringFlag{
 			Name:        "to",
 			Aliases:     []string{"t"},
 			Usage:       "End of the commit range (inclusive)",
 			Required:    true,
-			Destination: &to,
+			Destination: &flagTo,
+		},
+		&cli.BoolFlag{
+			Name:        "verbose",
+			Aliases:     []string{"v"},
+			Usage:       "Verbose output",
+			Required:    false,
+			Destination: &flagVerbose,
+		},
+		&cli.BoolFlag{
+			Name:        "no-color",
+			Usage:       "Disable color output",
+			Required:    false,
+			Destination: &flagNoColor,
+		},
+		&cli.BoolFlag{
+			Name:        "json",
+			Usage:       "Show output in JSON format",
+			Required:    false,
+			Destination: &flagJSON,
 		},
 	},
 
 	Action: func(ctx context.Context, cmd *cli.Command) error {
+		color.NoColor = flagNoColor
+
+		configureLogger(os.Stderr, flagVerbose)
+
 		cfg, err := validator.LoadConfig()
 		if err != nil {
 			return fmt.Errorf("loading config: %w", err)
@@ -64,7 +93,7 @@ Examples:
 			return fmt.Errorf("creating validator: %w", err)
 		}
 
-		violations, err := vld.Validate(ctx, from, to)
+		violations, err := vld.Validate(ctx, flagFrom, flagTo)
 		if err != nil {
 			return fmt.Errorf("validation failed: %w", err)
 		}
@@ -73,15 +102,59 @@ Examples:
 			return nil
 		}
 
-		encoder := json.NewEncoder(cmd.Writer)
-		encoder.SetIndent("", "  ")
+		msg := fmt.Sprintf("%d violation(s) found:", len(violations))
+		_, _ = color.New(color.FgRed, color.Bold).Fprintln(cmd.ErrWriter, msg)
 
-		for _, v := range violations {
-			if err := encoder.Encode(v); err != nil {
-				return fmt.Errorf("failed to output violation: %w", err)
+		if flagJSON {
+			err := jsonOutput(cmd.Writer, violations)
+			if err != nil {
+				return err
 			}
+		} else {
+			textOutput(cmd.Writer, violations)
 		}
 
 		return nil
 	},
+}
+
+func textOutput(w io.Writer, violations []validator.Violation) {
+	shaColor := color.New(color.FgYellow, color.Bold)
+	for _, v := range violations {
+		_, _ = fmt.Fprintf(w, "%s %s\n", shaColor.Sprintf("%s", v.SHA), v.Header)
+		for _, o := range v.Outsiders {
+			_, _ = fmt.Fprintf(w, "  - %s\n", o.File)
+		}
+	}
+}
+
+func jsonOutput(writer io.Writer, violations []validator.Violation) error {
+	encoder := json.NewEncoder(writer)
+	encoder.SetIndent("", "  ")
+
+	for _, v := range violations {
+		if err := encoder.Encode(v); err != nil {
+			return fmt.Errorf("failed to output violation: %w", err)
+		}
+	}
+
+	return nil
+}
+
+func configureLogger(writer io.Writer, verbose bool) {
+	opts := &slog.HandlerOptions{
+		AddSource: false,
+		Level:     slog.LevelInfo,
+	}
+
+	if verbose {
+		opts.Level = slog.LevelDebug
+		opts.AddSource = true
+	}
+
+	handler := slog.NewTextHandler(writer, opts)
+
+	logger := slog.New(handler)
+
+	slog.SetDefault(logger)
 }

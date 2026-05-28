@@ -3,6 +3,7 @@ module github.com/thumbrise/commitlint-scope
 go 1.26.1
 
 require (
+	github.com/fatih/color v1.19.0
 	github.com/go-viper/mapstructure/v2 v2.5.0
 	github.com/gobwas/glob v0.2.3
 	github.com/spf13/viper v1.21.0
