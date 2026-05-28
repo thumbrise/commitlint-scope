@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "commitlint-scope configuration",
+  "description": "Configuration for commitlint-scope - a linter that checks if declared commit scopes match the changed files.",
+  "type": "object",
+  "properties": {
+    "scopeRegex": {
+      "description": "Regular expression used to extract the scope from a conventional commit header. It must contain a named group 'scope'. If omitted, a sensible default is used. https://github.com/google/re2/wiki/Syntax",
+      "type": "string",
+      "format": "regex",
+      "pattern": "\\(\\?P<scope>"
+    },
+    "patterns": {
+      "description": "Mapping from scope names to lists of glob patterns. A file is considered to belong to a scope if its path matches at least one of the patterns. Patterns support globstars (**) and standard wildcards. If a scope has no explicit patterns, the default pattern `<scope>/**` is applied.",
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "minItems": 1,
+        "uniqueItems": true
+      }
+    }
+  },
+  "additionalProperties": false
+}
