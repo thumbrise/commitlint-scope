@@ -9,6 +9,7 @@ import (
 	"os"
 
 	"github.com/fatih/color"
+	"github.com/thumbrise/commitlint-scope/cmd/errs"
 	"github.com/thumbrise/commitlint-scope/pkg/validator"
 	"github.com/urfave/cli/v3"
 )
@@ -100,9 +101,6 @@ Examples:
 			return nil
 		}
 
-		msg := fmt.Sprintf("%d violation(s) found:", len(violations))
-		_, _ = color.New(color.FgRed, color.Bold).Fprintln(cmd.ErrWriter, msg)
-
 		if flagRunJSON {
 			err := jsonOutput(cmd.Writer, violations)
 			if err != nil {
@@ -112,7 +110,7 @@ Examples:
 			textOutput(cmd.Writer, violations)
 		}
 
-		return nil
+		return errs.NewViolationsFound(len(violations))
 	},
 }
 

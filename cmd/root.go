@@ -1,6 +1,11 @@
 package cmd
 
 import (
+	"context"
+	"errors"
+	"os"
+
+	"github.com/fatih/color"
 	"github.com/thumbrise/commitlint-scope/cmd/commands"
 	"github.com/urfave/cli/v3"
 )
@@ -13,4 +18,16 @@ var Root = &cli.Command{
 		commands.RunCMD,
 	},
 	Suggest: true,
+	ExitErrHandler: func(ctx context.Context, command *cli.Command, err error) {
+		code := 1
+
+		if coder, ok := errors.AsType[cli.ExitCoder](err); ok {
+			code = coder.ExitCode()
+		}
+
+		_, _ = color.New(color.FgRed, color.Bold).Fprintf(os.Stderr, "\n%s\n", err)
+		_, _ = color.New(color.FgRed, color.Bold).Fprintf(os.Stderr, "\nexit code %d\n", code)
+
+		os.Exit(code)
+	},
 }
