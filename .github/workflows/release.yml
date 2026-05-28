@@ -25,6 +25,18 @@ jobs:
           node-version: "lts/*"
           cache: npm
 
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+
+      - name: Setup Go-Releaser
+        uses: goreleaser/goreleaser-action@v7
+        with:
+          distribution: goreleaser
+          version: latest
+          install-only: true
+
       - name: Install dependencies
         run: npm ci
 
