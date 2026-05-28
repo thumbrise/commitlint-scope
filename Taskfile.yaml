@@ -24,3 +24,9 @@ tasks:
       - gen
     cmds:
       - go tool mockery
+
+  build:
+    desc: Build
+    cmds:
+      - mkdir -p build
+      - go build -o build/
