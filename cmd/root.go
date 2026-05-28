@@ -132,10 +132,8 @@ func jsonOutput(writer io.Writer, violations []validator.Violation) error {
 	encoder := json.NewEncoder(writer)
 	encoder.SetIndent("", "  ")
 
-	for _, v := range violations {
-		if err := encoder.Encode(v); err != nil {
-			return fmt.Errorf("failed to output violation: %w", err)
-		}
+	if err := encoder.Encode(violations); err != nil {
+		return fmt.Errorf("failed to output violations: %w", err)
 	}
 
 	return nil
