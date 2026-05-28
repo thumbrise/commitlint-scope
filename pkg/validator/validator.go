@@ -10,6 +10,7 @@ import (
 var (
 	ErrGetMessage      = errors.New("get commit message")
 	ErrGetChangedFiles = errors.New("get changed files")
+	ErrShaLength       = errors.New("sha length must be greater than 0")
 )
 
 type Violation struct {
@@ -44,7 +45,7 @@ type Validator struct {
 	shaLength      int
 }
 
-func NewValidator(cfg Config, options Options) *Validator {
+func NewValidator(cfg Config, options Options) (*Validator, error) {
 	logger := options.Logger
 	shaLength := options.SHALength
 	scopeParser := options.ScopeParser
@@ -60,7 +61,12 @@ func NewValidator(cfg Config, options Options) *Validator {
 	}
 
 	if outsiderFinder == nil {
-		outsiderFinder = NewDefaultOutsiderFinder(cfg.Patterns)
+		var err error
+
+		outsiderFinder, err = NewDefaultOutsiderFinder(cfg.Patterns)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	if scopeParser == nil {
@@ -72,7 +78,7 @@ func NewValidator(cfg Config, options Options) *Validator {
 	}
 
 	if shaLength < 0 {
-		panic("ShaLength must be greater than 0")
+		return nil, fmt.Errorf("%w, got %d", ErrShaLength, shaLength)
 	}
 
 	return &Validator{
@@ -81,7 +87,7 @@ func NewValidator(cfg Config, options Options) *Validator {
 		outsiderFinder: outsiderFinder,
 		scopeParser:    scopeParser,
 		shaLength:      shaLength,
-	}
+	}, nil
 }
 
 func (v *Validator) Validate(ctx context.Context, from, to string) ([]Violation, error) {
