@@ -71,7 +71,7 @@ module.exports = {
         [
             '@semantic-release/exec',
             {
-                publishCmd: 'goreleaser release --clean'
+                publishCmd: 'echo "${nextRelease.notes}" > /tmp/release-notes.md && goreleaser release --release-notes /tmp/release-notes.md --clean'
             }
         ]
     ]
