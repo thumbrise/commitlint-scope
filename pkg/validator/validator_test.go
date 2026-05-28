@@ -47,7 +47,7 @@ func TestValidator_OneViolation(t *testing.T) {
 
 	const shaLength = 7
 
-	v := validator.NewValidator(
+	v, err := validator.NewValidator(
 		validator.Config{},
 		validator.Options{
 			Logger:         logger,
@@ -56,6 +56,9 @@ func TestValidator_OneViolation(t *testing.T) {
 			OutsiderFinder: outsider,
 			ScopeParser:    parser,
 		})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	violations, err := v.Validate(context.Background(), "main", "feature-branch")
 	if err != nil {
@@ -134,7 +137,7 @@ func TestValidator_Scenarios(t *testing.T) {
 
 			SetupExpectations(t, tt.commits, git, parser, outsider)
 
-			v := validator.NewValidator(
+			v, err := validator.NewValidator(
 				validator.Config{},
 				validator.Options{
 					Logger:         logger,
@@ -143,6 +146,10 @@ func TestValidator_Scenarios(t *testing.T) {
 					OutsiderFinder: outsider,
 					ScopeParser:    parser,
 				})
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+
 			violations, err := v.Validate(context.Background(), "main", "feature-branch")
 
 			if tt.wantErr && err == nil {

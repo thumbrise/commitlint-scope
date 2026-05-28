@@ -89,7 +89,11 @@ func TestDefaultOutsiderFinder_Find(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			finder := validator.NewDefaultOutsiderFinder(tt.patterns)
+			finder, err := validator.NewDefaultOutsiderFinder(tt.patterns)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+
 			got := finder.Find(tt.scope, tt.files)
 
 			// Convert got outsidersFiles to slice of file names

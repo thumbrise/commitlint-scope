@@ -53,13 +53,16 @@ Examples:
 			return fmt.Errorf("loading config: %w", err)
 		}
 
-		vld := validator.NewValidator(cfg, validator.Options{
+		vld, err := validator.NewValidator(cfg, validator.Options{
 			Logger:         slog.Default(),
 			SHALength:      7,
 			Git:            nil,
 			OutsiderFinder: nil,
 			ScopeParser:    nil,
 		})
+		if err != nil {
+			return fmt.Errorf("creating validator: %w", err)
+		}
 
 		violations, err := vld.Validate(ctx, from, to)
 		if err != nil {

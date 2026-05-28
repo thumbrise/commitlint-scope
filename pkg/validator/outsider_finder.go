@@ -1,45 +1,60 @@
 package validator
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/gobwas/glob"
 )
 
+var ErrInvalidGlobPattern = errors.New("invalid glob pattern")
+
 // DefaultOutsiderFinder checks whether files match predefined glob patterns for a given scope.
 type DefaultOutsiderFinder struct {
-	humanFilePatterns map[string][]string
-	globFilePatterns  map[string][]glob.Glob
+	scopesToPatternsHuman map[string][]string
+	scopesToPatternsGlob  map[string][]glob.Glob
 }
 
 // NewDefaultOutsiderFinder creates a new DefaultOutsiderFinder.
-// Patterns is a map from scope name to a list of glob pattern strings.
-// Patterns are compiled immediately; invalid patterns will panic.
-func NewDefaultOutsiderFinder(patterns map[string][]string) *DefaultOutsiderFinder {
-	globMap := make(map[string][]glob.Glob, len(patterns))
-	for scope, pats := range patterns {
-		globs := make([]glob.Glob, 0, len(pats))
-		for _, p := range pats {
-			globs = append(globs, glob.MustCompile(p, '/'))
+// scopesToPatterns is a map from scope name to a list of glob pattern strings.
+func NewDefaultOutsiderFinder(scopesToPatterns map[string][]string) (*DefaultOutsiderFinder, error) {
+	scopesToPatternsGlob := make(map[string][]glob.Glob, len(scopesToPatterns))
+	for scope, patterns := range scopesToPatterns {
+		globs := make([]glob.Glob, 0, len(patterns))
+		for _, pattern := range patterns {
+			g, err := glob.Compile(pattern, '/')
+			if err != nil {
+				return nil, fmt.Errorf("%w: %q: %w", ErrInvalidGlobPattern, pattern, err)
+			}
+
+			globs = append(globs, g)
 		}
 
-		globMap[scope] = globs
+		scopesToPatternsGlob[scope] = globs
 	}
 
 	return &DefaultOutsiderFinder{
-		humanFilePatterns: patterns,
-		globFilePatterns:  globMap,
-	}
+		scopesToPatternsHuman: scopesToPatterns,
+		scopesToPatternsGlob:  scopesToPatternsGlob,
+	}, nil
 }
 
 // Find returns files that do not match any pattern for the given scope.
 // If the scope has no patterns, zero config fallback applied - (scope + /**)
 func (f *DefaultOutsiderFinder) Find(scope string, files []string) []Outsider {
-	globFilePatterns := f.globFilePatterns[scope]
-	humanFilePatterns := f.humanFilePatterns[scope]
+	globFilePatterns := f.scopesToPatternsGlob[scope]
+	humanFilePatterns := f.scopesToPatternsHuman[scope]
 
 	// zero config
 	if len(globFilePatterns) == 0 {
 		defaultPattern := scope + "/**"
-		g := glob.MustCompile(defaultPattern, '/')
+
+		g, err := glob.Compile(defaultPattern, '/')
+		if err != nil {
+			errPanic := fmt.Sprintf("cannot compile default pattern %q: %s", defaultPattern, err.Error())
+			panic(errPanic)
+		}
+
 		globFilePatterns = []glob.Glob{g}
 		humanFilePatterns = []string{defaultPattern}
 	}
