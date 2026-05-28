@@ -21,8 +21,8 @@ func TestLoadConfig(t *testing.T) {
 		wantPatterns map[string][]string
 	}{
 		{
-			name:         "no config file",
-			wantRegexNil: true,
+			name:      "no config file",
+			wantRegex: defaultRegexStr,
 		},
 		{
 			name: "patterns with default regex",

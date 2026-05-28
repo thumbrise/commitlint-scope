@@ -17,21 +17,21 @@ type Config struct {
 	Patterns   map[string][]string `mapstructure:"patterns"`
 }
 
+var ErrConfigRead = errors.New("error reading config")
+
 func LoadConfig() (Config, error) {
 	v := viper.New()
 	v.SetConfigName(configName)
 	v.AddConfigPath(".")
 	v.SetDefault("scopeRegex", regexp.MustCompile(`^[a-z]+(?:\((?P<scope>[^)]+)\))?!?:\s`))
 
-	if err := v.ReadInConfig(); err != nil {
-		if _, ok := errors.AsType[viper.ConfigFileNotFoundError](err); ok {
-			return Config{}, nil
-		}
-
-		return Config{}, err
-	}
-
 	var cfg Config
+
+	if err := v.ReadInConfig(); err != nil {
+		if _, ok := errors.AsType[viper.ConfigFileNotFoundError](err); !ok {
+			return Config{}, fmt.Errorf("%w: %w", ErrConfigRead, err)
+		}
+	}
 
 	if err := v.Unmarshal(&cfg, regexDecode); err != nil {
 		return Config{}, err
