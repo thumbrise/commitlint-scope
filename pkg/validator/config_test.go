@@ -19,6 +19,7 @@ func TestLoadConfig(t *testing.T) {
 		wantRegexNil bool
 		wantRegex    string
 		wantPatterns map[string][]string
+		wantErr      error
 	}{
 		{
 			name:      "no config file",
@@ -56,6 +57,11 @@ patterns:
 				"api": {"api/*"},
 			},
 		},
+		{
+			name:    "malformed config",
+			yaml:    "[[invalid",
+			wantErr: validator.ErrConfigRead,
+		},
 	}
 
 	for _, tt := range tests {
@@ -76,6 +82,13 @@ patterns:
 			}
 
 			cfg, err := validator.LoadConfig()
+			if tt.wantErr != nil {
+				require.Error(t, err)
+				assert.ErrorIs(t, err, tt.wantErr)
+
+				return
+			}
+
 			require.NoError(t, err)
 
 			if tt.wantRegexNil {
