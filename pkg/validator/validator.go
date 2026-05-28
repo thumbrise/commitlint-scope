@@ -105,14 +105,14 @@ func (v *Validator) Validate(ctx context.Context, from, to string) ([]Violation,
 		}
 
 		if message == "" {
-			v.logger.Info("no message, skip", "sha", sha)
+			v.logger.Debug("no message, skip", "sha", sha)
 
 			continue
 		}
 
 		scope := v.scopeParser.Parse(message)
 		if scope == "" {
-			v.logger.Info("no scope, skip", "sha", sha, "message", message)
+			v.logger.Debug("no scope, skip", "sha", sha, "message", message)
 
 			continue
 		}
@@ -123,7 +123,7 @@ func (v *Validator) Validate(ctx context.Context, from, to string) ([]Violation,
 		}
 
 		if len(files) == 0 {
-			v.logger.Info("no files changed, skip", "sha", sha)
+			v.logger.Debug("no files changed, skip", "sha", sha)
 
 			continue
 		}
