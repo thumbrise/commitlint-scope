@@ -23,6 +23,10 @@ func LoadConfig() (Config, error) {
 	v.SetDefault("scopeRegex", regexp.MustCompile(`^[a-z]+(?:\((?P<scope>[^)]+)\))?!?:\s`))
 
 	if err := v.ReadInConfig(); err != nil {
+		if _, ok := errors.AsType[viper.ConfigFileNotFoundError](err); ok {
+			return Config{}, nil
+		}
+
 		return Config{}, err
 	}
 
