@@ -5,7 +5,7 @@ tasks:
   run:
     desc: Run
     cmds:
-      - go run .
+      - go run . {{.CLI_ARGS}}
 
   lint:
     desc: Run lint with auto-fix where possible (dev workflow)
@@ -29,4 +29,4 @@ tasks:
     desc: Build
     cmds:
       - mkdir -p build
-      - go build -o build/
+      - go build -o build/ -ldflags="-s -w -X main.version=1.0.0-local -X main.commit=aabbcc -X main.date=2006-01-02T15:04:05Z07:00"
