@@ -67,6 +67,12 @@ module.exports = {
                 }
             }
         ],
-        '@semantic-release/github'
+        '@semantic-release/github',
+        [
+            '@semantic-release/exec',
+            {
+                publishCmd: 'goreleaser release --clean'
+            }
+        ]
     ]
 };

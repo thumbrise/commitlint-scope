@@ -2,3 +2,5 @@
 node_modules
 commitlint-scope
 build/*
+# Added by goreleaser init:
+dist/
