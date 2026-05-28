@@ -16,6 +16,7 @@ var Root = &cli.Command{
 	Description: `commitlint-scope - a linter that checks if declared commit scopes match the changed files`,
 	Commands: []*cli.Command{
 		commands.RunCMD,
+		commands.InitCMD,
 	},
 	Suggest: true,
 	ExitErrHandler: func(ctx context.Context, command *cli.Command, err error) {

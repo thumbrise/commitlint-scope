@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-const configName = ".commitlint-scope"
+const ConfigName = ".commitlint-scope"
 
 type Config struct {
 	ScopeRegex *regexp.Regexp      `mapstructure:"scopeRegex"`
@@ -21,7 +21,7 @@ var ErrConfigRead = errors.New("error reading config")
 
 func LoadConfig() (Config, error) {
 	v := viper.New()
-	v.SetConfigName(configName)
+	v.SetConfigName(ConfigName)
 	v.AddConfigPath(".")
 	v.SetDefault("scopeRegex", regexp.MustCompile(`^[a-z]+(?:\((?P<scope>[^)]+)\))?!?:\s`))
 
