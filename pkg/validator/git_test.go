@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/thumbrise/commitlint-scope/v2/pkg/validator"
+	"github.com/thumbrise/commitlint-scope/v3/pkg/validator"
 )
 
 func gitCall(t *testing.T, dir string, args ...string) string {

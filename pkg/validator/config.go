@@ -12,9 +12,14 @@ import (
 
 const ConfigName = ".commitlint-scope"
 
+type PatternItem struct {
+	Scopes []string `mapstructure:"scopes"`
+	Files  []string `mapstructure:"files"`
+}
+
 type Config struct {
-	ScopeRegex *regexp.Regexp      `mapstructure:"scopeRegex"`
-	Patterns   map[string][]string `mapstructure:"patterns"`
+	ScopeRegex *regexp.Regexp `mapstructure:"scopeRegex"`
+	Patterns   []PatternItem  `mapstructure:"patterns"`
 }
 
 var ErrConfigRead = errors.New("error reading config")

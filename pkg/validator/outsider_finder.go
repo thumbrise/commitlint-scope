@@ -15,13 +15,21 @@ type DefaultOutsiderFinder struct {
 	scopesToPatternsGlob  map[string][]glob.Glob
 }
 
+// OutsiderFinderPattern matches the new configuration structure.
+type OutsiderFinderPattern struct {
+	Scopes []string
+	Files  []string
+}
+
 // NewDefaultOutsiderFinder creates a new DefaultOutsiderFinder.
-// scopesToPatterns is a map from scope name to a list of glob pattern strings.
-func NewDefaultOutsiderFinder(scopesToPatterns map[string][]string) (*DefaultOutsiderFinder, error) {
-	scopesToPatternsGlob := make(map[string][]glob.Glob, len(scopesToPatterns))
-	for scope, patterns := range scopesToPatterns {
-		globs := make([]glob.Glob, 0, len(patterns))
-		for _, pattern := range patterns {
+// It accepts a slice of OutsiderFinderPattern and flattens it into efficient lookup maps.
+func NewDefaultOutsiderFinder(patterns []OutsiderFinderPattern) (*DefaultOutsiderFinder, error) {
+	scopesToPatternsHuman := make(map[string][]string)
+	scopesToPatternsGlob := make(map[string][]glob.Glob)
+
+	for _, item := range patterns {
+		globs := make([]glob.Glob, 0, len(item.Files))
+		for _, pattern := range item.Files {
 			g, err := glob.Compile(pattern, '/')
 			if err != nil {
 				return nil, fmt.Errorf("%w: %q: %w", ErrInvalidGlobPattern, pattern, err)
@@ -30,11 +38,14 @@ func NewDefaultOutsiderFinder(scopesToPatterns map[string][]string) (*DefaultOut
 			globs = append(globs, g)
 		}
 
-		scopesToPatternsGlob[scope] = globs
+		for _, scope := range item.Scopes {
+			scopesToPatternsHuman[scope] = append(scopesToPatternsHuman[scope], item.Files...)
+			scopesToPatternsGlob[scope] = append(scopesToPatternsGlob[scope], globs...)
+		}
 	}
 
 	return &DefaultOutsiderFinder{
-		scopesToPatternsHuman: scopesToPatterns,
+		scopesToPatternsHuman: scopesToPatternsHuman,
 		scopesToPatternsGlob:  scopesToPatternsGlob,
 	}, nil
 }
@@ -47,7 +58,7 @@ func (f *DefaultOutsiderFinder) Find(scope string, files []string) []Outsider {
 
 	// zero config
 	if len(globFilePatterns) == 0 {
-		defaultPattern := scope + "/**"
+		defaultPattern := glob.QuoteMeta(scope) + "/**"
 
 		g, err := glob.Compile(defaultPattern, '/')
 		if err != nil {

@@ -5,21 +5,24 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/thumbrise/commitlint-scope/v2/pkg/validator"
+	"github.com/thumbrise/commitlint-scope/v3/pkg/validator"
 )
 
 func TestDefaultOutsiderFinder_Find(t *testing.T) {
 	tests := []struct {
 		name          string
-		patterns      map[string][]string
+		patterns      []validator.OutsiderFinderPattern
 		scope         string
 		files         []string
 		wantOutsiders []string
 	}{
 		{
 			name: "no explicit patterns - uses scope/** as default",
-			patterns: map[string][]string{
-				"api": {},
+			patterns: []validator.OutsiderFinderPattern{
+				{
+					Scopes: []string{"api"},
+					Files:  []string{},
+				},
 			},
 			scope:         "api",
 			files:         []string{"api/handler.go", "api/helper.go", "core/other.go"},
@@ -27,14 +30,18 @@ func TestDefaultOutsiderFinder_Find(t *testing.T) {
 		},
 		{
 			name:          "no explicit patterns, even no configured scopes - uses scope/** as default",
+			patterns:      nil,
 			scope:         "api",
 			files:         []string{"api/handler.go", "api/helper.go", "core/other.go"},
 			wantOutsiders: []string{"core/other.go"},
 		},
 		{
 			name: "exact match with wildcard",
-			patterns: map[string][]string{
-				"api": {"api/*"},
+			patterns: []validator.OutsiderFinderPattern{
+				{
+					Scopes: []string{"api"},
+					Files:  []string{"api/*"},
+				},
 			},
 			scope:         "api",
 			files:         []string{"api/handler.go", "api/helper.go", "core/other.go"},
@@ -42,8 +49,11 @@ func TestDefaultOutsiderFinder_Find(t *testing.T) {
 		},
 		{
 			name: "globstar matches nested files",
-			patterns: map[string][]string{
-				"api": {"api/**"},
+			patterns: []validator.OutsiderFinderPattern{
+				{
+					Scopes: []string{"api"},
+					Files:  []string{"api/**"},
+				},
 			},
 			scope:         "api",
 			files:         []string{"api/handler.go", "api/sub/helper.go", "core/other.go"},
@@ -51,8 +61,11 @@ func TestDefaultOutsiderFinder_Find(t *testing.T) {
 		},
 		{
 			name: "wildcard matches dotfiles (like dot:true)",
-			patterns: map[string][]string{
-				"env": {"*"},
+			patterns: []validator.OutsiderFinderPattern{
+				{
+					Scopes: []string{"env"},
+					Files:  []string{"*"},
+				},
 			},
 			scope:         "env",
 			files:         []string{".env", "config.go"},
@@ -60,8 +73,11 @@ func TestDefaultOutsiderFinder_Find(t *testing.T) {
 		},
 		{
 			name: "explicit dot pattern still works",
-			patterns: map[string][]string{
-				"env": {".*", "*.go"},
+			patterns: []validator.OutsiderFinderPattern{
+				{
+					Scopes: []string{"env"},
+					Files:  []string{".*", "*.go"},
+				},
 			},
 			scope:         "env",
 			files:         []string{".env", "config.go", ".gitignore"},
@@ -69,8 +85,11 @@ func TestDefaultOutsiderFinder_Find(t *testing.T) {
 		},
 		{
 			name: "globstar matches dot directories",
-			patterns: map[string][]string{
-				"api": {"api/**"},
+			patterns: []validator.OutsiderFinderPattern{
+				{
+					Scopes: []string{"api"},
+					Files:  []string{"api/**"},
+				},
 			},
 			scope:         "api",
 			files:         []string{"api/.internal/secret.go", "api/outer/file.go"},
@@ -78,12 +97,27 @@ func TestDefaultOutsiderFinder_Find(t *testing.T) {
 		},
 		{
 			name: "complex patterns with multiple stars",
-			patterns: map[string][]string{
-				"db": {"db/migrations/*.sql", "db/schema/**"},
+			patterns: []validator.OutsiderFinderPattern{
+				{
+					Scopes: []string{"db"},
+					Files:  []string{"db/migrations/*.sql", "db/schema/**"},
+				},
 			},
 			scope:         "db",
 			files:         []string{"db/migrations/001_init.sql", "db/schema/latest.json", "db/docs/readme.md"},
 			wantOutsiders: []string{"db/docs/readme.md"},
+		},
+		{
+			name: "multiple scopes sharing same patterns",
+			patterns: []validator.OutsiderFinderPattern{
+				{
+					Scopes: []string{"api", "v1.json"},
+					Files:  []string{"**/rail.v1.json"},
+				},
+			},
+			scope:         "v1.json",
+			files:         []string{"internal/rail.v1.json", "external/rail.v1.json", "core/other.go"},
+			wantOutsiders: []string{"core/other.go"},
 		},
 	}
 
