@@ -20,6 +20,8 @@ const InitConfigData = `#$schema: https://github.com/thumbrise/commitlint-scope/
 
 # Scope parsing customization. Not required, if you follow common conventional header. In example: 'type!(scope): subject'
 #scopeRegex: ^[a-z]+(?:\((?P<scope>[^)]+)\))?!?:\s
+
+# Patterns map: each key is a scope name, value is a list of glob patterns that match files belonging to that scope.
 patterns:
   "auth": [ "services/auth/**" ]
   "migrations": [ "database/migrations/*.sql" ]
