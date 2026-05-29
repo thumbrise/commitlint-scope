@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/thumbrise/commitlint-scope/pkg/validator"
+	"github.com/thumbrise/commitlint-scope/v2/pkg/validator"
 )
 
 func TestLoadConfig(t *testing.T) {

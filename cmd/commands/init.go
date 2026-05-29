@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/thumbrise/commitlint-scope/pkg/validator"
+	"github.com/thumbrise/commitlint-scope/v2/pkg/validator"
 	"github.com/urfave/cli/v3"
 )
 

@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/mock"
-	"github.com/thumbrise/commitlint-scope/pkg/validator"
+	"github.com/thumbrise/commitlint-scope/v2/pkg/validator"
 )
 
 type TestableCommit struct {

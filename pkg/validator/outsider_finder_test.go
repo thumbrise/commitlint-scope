@@ -5,7 +5,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/thumbrise/commitlint-scope/pkg/validator"
+	"github.com/thumbrise/commitlint-scope/v2/pkg/validator"
 )
 
 func TestDefaultOutsiderFinder_Find(t *testing.T) {

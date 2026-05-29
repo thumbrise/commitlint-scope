@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/thumbrise/commitlint-scope/cmd"
+	"github.com/thumbrise/commitlint-scope/v2/cmd"
 )
 
 var (
