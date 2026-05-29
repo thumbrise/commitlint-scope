@@ -9,4 +9,5 @@ RUN git config --global --add safe.directory '*'
 
 COPY $TARGETPLATFORM/commitlint-scope /usr/bin/
 
-CMD ["commitlint-scope"]
+ENTRYPOINT ["commitlint-scope"]
+CMD []
