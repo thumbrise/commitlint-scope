@@ -1,4 +1,4 @@
-module github.com/thumbrise/commitlint-scope
+module github.com/thumbrise/commitlint-scope/v2
 
 go 1.26.1
 

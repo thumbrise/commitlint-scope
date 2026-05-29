@@ -4,7 +4,7 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/thumbrise/commitlint-scope/pkg/validator"
+	"github.com/thumbrise/commitlint-scope/v2/pkg/validator"
 )
 
 func TestDefaultScopeParser_Parse(t *testing.T) {

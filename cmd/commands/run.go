@@ -9,8 +9,8 @@ import (
 	"os"
 
 	"github.com/fatih/color"
-	"github.com/thumbrise/commitlint-scope/cmd/errs"
-	"github.com/thumbrise/commitlint-scope/pkg/validator"
+	"github.com/thumbrise/commitlint-scope/v2/cmd/errs"
+	"github.com/thumbrise/commitlint-scope/v2/pkg/validator"
 	"github.com/urfave/cli/v3"
 )
 
