@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/thumbrise/commitlint-scope/v2/pkg/validator"
+	"github.com/thumbrise/commitlint-scope/v3/pkg/validator"
 )
 
 func TestLoadConfig(t *testing.T) {
@@ -18,7 +18,7 @@ func TestLoadConfig(t *testing.T) {
 		yaml         string
 		wantRegexNil bool
 		wantRegex    string
-		wantPatterns map[string][]string
+		wantPatterns []validator.PatternItem
 		wantErr      error
 	}{
 		{
@@ -28,15 +28,15 @@ func TestLoadConfig(t *testing.T) {
 		{
 			name: "patterns with default regex",
 			yaml: `patterns:
-  api:
-    - api/*
-  core:
-    - core/**
+  - scopes: ["api"]
+    files: ["api/*"]
+  - scopes: ["core"]
+    files: ["core/**"]
 `,
 			wantRegex: defaultRegexStr,
-			wantPatterns: map[string][]string{
-				"api":  {"api/*"},
-				"core": {"core/**"},
+			wantPatterns: []validator.PatternItem{
+				{Scopes: []string{"api"}, Files: []string{"api/*"}},
+				{Scopes: []string{"core"}, Files: []string{"core/**"}},
 			},
 		},
 		{
@@ -49,12 +49,23 @@ func TestLoadConfig(t *testing.T) {
 			name: "both patterns and custom scopeRegex",
 			yaml: `scopeRegex: '^(feat|fix):'
 patterns:
-  api:
-    - api/*
+  - scopes: ["api"]
+    files: ["api/*"]
 `,
 			wantRegex: `^(feat|fix):`,
-			wantPatterns: map[string][]string{
-				"api": {"api/*"},
+			wantPatterns: []validator.PatternItem{
+				{Scopes: []string{"api"}, Files: []string{"api/*"}},
+			},
+		},
+		{
+			name: "patterns with dots inside scopes",
+			yaml: `patterns:
+  - scopes: ["rail.v1.json"]
+    files: ["**/rail.v1.json"]
+`,
+			wantRegex: defaultRegexStr,
+			wantPatterns: []validator.PatternItem{
+				{Scopes: []string{"rail.v1.json"}, Files: []string{"**/rail.v1.json"}},
 			},
 		},
 		{

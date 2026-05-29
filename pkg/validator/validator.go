@@ -63,7 +63,12 @@ func NewValidator(cfg Config, options Options) (*Validator, error) {
 	if outsiderFinder == nil {
 		var err error
 
-		outsiderFinder, err = NewDefaultOutsiderFinder(cfg.Patterns)
+		ofPatterns := make([]OutsiderFinderPattern, len(cfg.Patterns))
+		for i, cfgPattern := range cfg.Patterns {
+			ofPatterns[i] = OutsiderFinderPattern(cfgPattern)
+		}
+
+		outsiderFinder, err = NewDefaultOutsiderFinder(ofPatterns)
 		if err != nil {
 			return nil, err
 		}

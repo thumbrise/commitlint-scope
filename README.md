@@ -95,17 +95,27 @@ commitlint-scope init
 ### Overview
 
 ```yaml
-#$schema: https://github.com/thumbrise/commitlint-scope/blob/main/docs/schema/config.json
+#$schema: https://github.com/thumbrise/commitlint-scope/blob/main/docs/schema/config.v3.json
 
 # Scope parsing customization. Not required, if you follow common conventional header. In example: 'type!(scope): subject'
 #scopeRegex: ^[a-z]+(?:\((?P<scope>[^)]+)\))?!?:\s
 
-# Patterns map: each key is a scope name, value is a list of glob patterns that match files belonging to that scope.
+# Patterns list: each item specifies a list of scopes and the corresponding file glob patterns.
 patterns:
-  "auth": [ "services/auth/**" ]
-  "migrations": [ "database/migrations/*.sql" ]
-  "frontend": [ "**/assets/**", "**/frontend/**" ]
-  "docs": [ "**/*.md" ]
+  - scopes: ["auth"]
+    files: ["services/auth/**"]
+
+  - scopes: ["migrations", "sql"]
+    files: ["database/migrations/*.sql"]
+
+  - scopes: ["frontend", "assets"]
+    files: ["**/assets/**", "**/frontend/**"]
+
+  - scopes: ["docs", "md"]
+    files: ["**/*.md"]
+
+  - scopes: ["some.dot.scope", "any-anotherscope"]
+    files: ["**/rail.v1.json"]
 ```
 
 ## Zero Configuration
@@ -191,7 +201,7 @@ pipelines:
 
 ## JSON schema
 
-https://github.com/thumbrise/commitlint-scope/blob/main/docs/schema/config.json
+https://github.com/thumbrise/commitlint-scope/blob/main/docs/schema/config.v3.json
 
 ## License
 

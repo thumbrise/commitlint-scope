@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/fatih/color"
-	"github.com/thumbrise/commitlint-scope/v2/cmd/commands"
+	"github.com/thumbrise/commitlint-scope/v3/cmd/commands"
 	"github.com/urfave/cli/v3"
 )
 
