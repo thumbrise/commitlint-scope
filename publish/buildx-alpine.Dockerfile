@@ -1,15 +1,12 @@
 # syntax=docker/dockerfile:1.4
-FROM golang:1.26-alpine
+FROM alpine:3.21
 
 ARG TARGETPLATFORM
 
-ENV GOROOT /usr/local/go
-
-ENV GOTOOLCHAIN auto
-
-RUN apk --no-cache add gcc musl-dev git mercurial
+RUN apk --no-cache add git
 
 RUN git config --global --add safe.directory '*'
 
 COPY $TARGETPLATFORM/commitlint-scope /usr/bin/
+
 CMD ["commitlint-scope"]
