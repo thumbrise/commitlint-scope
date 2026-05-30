@@ -3,61 +3,70 @@ package validator
 import (
 	"errors"
 	"fmt"
+	"os"
 	"reflect"
 	"regexp"
 
 	"github.com/go-viper/mapstructure/v2"
-	"github.com/spf13/viper"
+	"github.com/knadh/koanf/parsers/yaml"
+	"github.com/knadh/koanf/providers/file"
+	"github.com/knadh/koanf/v2"
 )
 
 const ConfigName = ".commitlint-scope.yaml"
 
 type PatternItem struct {
-	Scopes []string `mapstructure:"scopes"`
-	Files  []string `mapstructure:"files"`
+	Scopes []string `koanf:"scopes"`
+	Files  []string `koanf:"files"`
 }
 
 type Config struct {
-	ScopeRegex *regexp.Regexp `mapstructure:"scopeRegex"`
-	Patterns   []PatternItem  `mapstructure:"patterns"`
+	ScopeRegex *regexp.Regexp `koanf:"scopeRegex"`
+	Patterns   []PatternItem  `koanf:"patterns"`
 }
 
-var ErrConfigRead = errors.New("error reading config")
+var (
+	ErrConfigRead  = errors.New("error reading config")
+	ErrRegexDecode = errors.New("expected string for regexp decode")
+)
 
 func LoadConfig() (Config, error) {
-	v := viper.New()
-	v.SetConfigName(ConfigName)
-	v.AddConfigPath(".")
-	v.SetDefault("scopeRegex", regexp.MustCompile(`^[a-z]+(?:\((?P<scope>[^)]+)\))?!?:\s`))
+	k := koanf.New(".")
 
-	var cfg Config
+	defaultRegex := `^[a-z]+(?:\((?P<scope>[^)]+)\))?!?:\s`
+	_ = k.Set("scopeRegex", defaultRegex)
 
-	if err := v.ReadInConfig(); err != nil {
-		if _, ok := errors.AsType[viper.ConfigFileNotFoundError](err); !ok {
+	if err := k.Load(file.Provider(ConfigName), yaml.Parser()); err != nil {
+		if !os.IsNotExist(err) {
 			return Config{}, fmt.Errorf("%w: %w", ErrConfigRead, err)
 		}
 	}
 
-	if err := v.Unmarshal(&cfg, regexDecode); err != nil {
+	var cfg Config
+
+	unmarshalConf := koanf.UnmarshalConf{
+		DecoderConfig: &mapstructure.DecoderConfig{
+			Result:     &cfg,
+			DecodeHook: regexDecodeHook,
+		},
+	}
+
+	if err := k.UnmarshalWithConf("", &cfg, unmarshalConf); err != nil {
 		return Config{}, fmt.Errorf("%w: %w", ErrConfigRead, err)
 	}
 
 	return cfg, nil
 }
 
-var ErrRegexDecode = errors.New("expected string for regexp decode")
-
-func regexDecode(cfg *mapstructure.DecoderConfig) {
-	cfg.DecodeHook = func(from reflect.Type, to reflect.Type, data interface{}) (interface{}, error) {
-		if from.Kind() == reflect.String && to == reflect.TypeOf(&regexp.Regexp{}) {
-			val, ok := data.(string)
-			if !ok {
-				return nil, fmt.Errorf("%w got %T", ErrRegexDecode, data)
-			}
-
-			return regexp.Compile(val)
+func regexDecodeHook(from reflect.Type, to reflect.Type, data interface{}) (interface{}, error) {
+	if from.Kind() == reflect.String && to == reflect.TypeOf(&regexp.Regexp{}) {
+		val, ok := data.(string)
+		if !ok {
+			return nil, fmt.Errorf("%w got %T", ErrRegexDecode, data)
 		}
 
-		return data, nil
+		return regexp.Compile(val)
 	}
+
+	return data, nil
 }
