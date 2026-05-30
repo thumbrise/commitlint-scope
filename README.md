@@ -86,7 +86,7 @@ docker run --rm -v "$(pwd):/repo" -w /repo thumbrise/commitlint-scope:latest-alp
 
 ### Init
 
-Generate .commitlint-scope.yml file.
+Generate .commitlint-scope.yaml file.
 
 ```shell
 commitlint-scope init

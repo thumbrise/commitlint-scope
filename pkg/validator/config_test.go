@@ -88,7 +88,7 @@ patterns:
 			require.NoError(t, os.Chdir(dir))
 
 			if tt.yaml != "" {
-				err = os.WriteFile(filepath.Join(dir, ".commitlint-scope.yaml"), []byte(tt.yaml), 0o644)
+				err = os.WriteFile(filepath.Join(dir, validator.ConfigName), []byte(tt.yaml), 0o644)
 				require.NoError(t, err)
 			}
 
