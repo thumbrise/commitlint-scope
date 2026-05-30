@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-const ConfigName = ".commitlint-scope"
+const ConfigName = ".commitlint-scope.yaml"
 
 type PatternItem struct {
 	Scopes []string `mapstructure:"scopes"`
