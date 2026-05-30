@@ -1,0 +1,21 @@
+#$schema: https://github.com/thumbrise/commitlint-scope/blob/main/docs/schema/config.v3.json
+
+# Scope parsing customization. Not required, if you follow common conventional header. In example: 'type!(scope): subject'
+#scopeRegex: ^[a-z]+(?:\((?P<scope>[^)]+)\))?!?:\s
+
+# Patterns list: each item specifies a list of scopes and the corresponding file glob patterns.
+patterns:
+#  - scopes: ["auth"]
+#    files: ["services/auth/**"]
+#
+#  - scopes: ["migrations", "sql"]
+#    files: ["database/migrations/*.sql"]
+#
+#  - scopes: ["frontend", "assets"]
+#    files: ["**/assets/**", "**/frontend/**"]
+#
+#  - scopes: ["docs", "md"]
+#    files: ["**/*.md"]
+#
+#  - scopes: ["some.dot.scope", "any-anotherscope"]
+#    files: ["**/rail.v1.json"]
