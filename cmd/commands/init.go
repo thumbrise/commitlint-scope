@@ -40,7 +40,7 @@ patterns:
 `
 
 const (
-	InitConfigFileName = validator.ConfigName + ".yml"
+	InitConfigFileName = validator.ConfigName + ".yaml"
 	InitConfigFileMode = 0o600
 )
 
