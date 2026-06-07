@@ -13,7 +13,7 @@ import (
 type TestableCommit struct {
 	sha, message   string
 	files          []string
-	scope          string
+	scopes         []string
 	outsidersFiles []string
 	messageErr     error
 }
@@ -33,7 +33,7 @@ func TestValidator_OneViolation(t *testing.T) {
 			sha:            commitSHA,
 			message:        commitMessage,
 			files:          filesChanged,
-			scope:          commitScope,
+			scopes:         []string{commitScope},
 			outsidersFiles: filesChanged,
 			messageErr:     nil,
 		},
@@ -98,13 +98,13 @@ func TestValidator_Scenarios(t *testing.T) {
 		{
 			name: "TestableCommit with scope and no outsidersFiles",
 			commits: []TestableCommit{
-				{sha: "bbb2222bbb", message: "feat(api): add endpoint", files: []string{"api/handler.go"}, scope: "api"},
+				{sha: "bbb2222bbb", message: "feat(api): add endpoint", files: []string{"api/handler.go"}, scopes: []string{"api"}},
 			},
 		},
 		{
 			name: "TestableCommit with outsider file",
 			commits: []TestableCommit{
-				{sha: "ccc3333ccc", message: "fix(auth): token", files: []string{"auth/service.go", "api/handler.go"}, scope: "auth", outsidersFiles: []string{"api/handler.go"}},
+				{sha: "ccc3333ccc", message: "fix(auth): token", files: []string{"auth/service.go", "api/handler.go"}, scopes: []string{"auth"}, outsidersFiles: []string{"api/handler.go"}},
 			},
 			wantViolations: 1,
 		},
@@ -117,7 +117,7 @@ func TestValidator_Scenarios(t *testing.T) {
 		{
 			name: "no files changed skipped",
 			commits: []TestableCommit{
-				{sha: "eee5555eee", message: "feat(ui): button", files: []string{}, scope: "ui"},
+				{sha: "eee5555eee", message: "feat(ui): button", files: []string{}, scopes: []string{"ui"}},
 			},
 		},
 		{
@@ -126,6 +126,19 @@ func TestValidator_Scenarios(t *testing.T) {
 				{sha: "fff6666fff", message: "", messageErr: errors.New("git command failed")},
 			},
 			wantErr: true,
+		},
+		{
+			name: "multi scope with outsiders",
+			commits: []TestableCommit{
+				{
+					sha:            "ggg7777ggg",
+					message:        "feat(api, db): add endpoint",
+					files:          []string{"api/handler.go", "db/schema.sql", "core/other.go", "README.md"},
+					scopes:         []string{"api", "db"},
+					outsidersFiles: []string{"core/other.go", "README.md"},
+				},
+			},
+			wantViolations: 1,
 		},
 	}
 
@@ -167,6 +180,15 @@ func TestValidator_Scenarios(t *testing.T) {
 	}
 }
 
+func outsidersFromFiles(files []string) []validator.Outsider {
+	out := make([]validator.Outsider, len(files))
+	for i, f := range files {
+		out[i] = validator.Outsider{File: f, UnmatchedPatterns: nil}
+	}
+
+	return out
+}
+
 func SetupExpectations(t *testing.T, commits []TestableCommit, git *validator.MockGit, parser *validator.MockScopeParser, outsider *validator.MockOutsiderFinder) {
 	t.Helper()
 
@@ -190,10 +212,10 @@ func SetupExpectations(t *testing.T, commits []TestableCommit, git *validator.Mo
 			continue
 		}
 
-		if c.scope != "" {
-			parser.EXPECT().Parse(c.message).Return(c.scope)
+		if len(c.scopes) > 0 {
+			parser.EXPECT().Parse(c.message).Return(c.scopes)
 		} else {
-			parser.EXPECT().Parse(c.message).Return("")
+			parser.EXPECT().Parse(c.message).Return(nil)
 
 			continue
 		}
@@ -204,14 +226,10 @@ func SetupExpectations(t *testing.T, commits []TestableCommit, git *validator.Mo
 			continue
 		}
 
-		outsiders := make([]validator.Outsider, len(c.outsidersFiles))
-		for i, outsiderFile := range c.outsidersFiles {
-			outsiders[i] = validator.Outsider{
-				File:              outsiderFile,
-				UnmatchedPatterns: nil,
-			}
-		}
+		outsiders := outsidersFromFiles(c.outsidersFiles)
 
-		outsider.EXPECT().Find(c.scope, c.files).Return(outsiders)
+		for _, scope := range c.scopes {
+			outsider.EXPECT().Find(scope, c.files).Return(outsiders)
+		}
 	}
 }

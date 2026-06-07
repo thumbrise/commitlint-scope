@@ -100,6 +100,9 @@ commitlint-scope init
 # Scope parsing customization. Not required, if you follow common conventional header. In example: 'type!(scope): subject'
 #scopeRegex: ^[a-z]+(?:\((?P<scope>[^)]+)\))?!?:\s
 
+# If your commit messages use a non-comma separator between scopes (e.g. 'feat(api | db): msg'), set it here.
+#scopeSeparator: ","
+
 # Patterns list: each item specifies a list of scopes and the corresponding file glob patterns.
 patterns:
   - scopes: ["auth"]
@@ -118,19 +121,16 @@ patterns:
     files: ["**/rail.v1.json"]
 ```
 
-## Zero Configuration
-
 Without a configuration file, each scope is used as a glob pattern by appending /**.
-For example, a commit with scope auth will check if any changed file matches auth/**.
-This behaviour keeps things simple for repositories where directory names mirror commit scopes.
+Multiple scopes in a single commit are resolved independently — `feat(api, db): ...` will check files against patterns for both `api` and `db`. If a scope separator other than comma is used, set `scopeSeparator` in the config.
 
 For example:
 
 ```text
-feat(auth): Some subject
+feat(auth, docs): Some subject
 ```
 
-Linter will compare changed files against glob pattern `auth/**`.
+Linter will check changed files against glob patterns `auth/**` and `docs/**`.
 
 
 ## CI

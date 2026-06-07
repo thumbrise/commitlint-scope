@@ -273,18 +273,20 @@ func (_m *MockScopeParser) EXPECT() *MockScopeParser_Expecter {
 }
 
 // Parse provides a mock function for the type MockScopeParser
-func (_mock *MockScopeParser) Parse(message string) string {
+func (_mock *MockScopeParser) Parse(message string) []string {
 	ret := _mock.Called(message)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Parse")
 	}
 
-	var r0 string
-	if returnFunc, ok := ret.Get(0).(func(string) string); ok {
+	var r0 []string
+	if returnFunc, ok := ret.Get(0).(func(string) []string); ok {
 		r0 = returnFunc(message)
 	} else {
-		r0 = ret.Get(0).(string)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]string)
+		}
 	}
 	return r0
 }
@@ -313,12 +315,12 @@ func (_c *MockScopeParser_Parse_Call) Run(run func(message string)) *MockScopePa
 	return _c
 }
 
-func (_c *MockScopeParser_Parse_Call) Return(s string) *MockScopeParser_Parse_Call {
-	_c.Call.Return(s)
+func (_c *MockScopeParser_Parse_Call) Return(strings []string) *MockScopeParser_Parse_Call {
+	_c.Call.Return(strings)
 	return _c
 }
 
-func (_c *MockScopeParser_Parse_Call) RunAndReturn(run func(message string) string) *MockScopeParser_Parse_Call {
+func (_c *MockScopeParser_Parse_Call) RunAndReturn(run func(message string) []string) *MockScopeParser_Parse_Call {
 	_c.Call.Return(run)
 	return _c
 }

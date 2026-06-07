@@ -11,6 +11,7 @@ var (
 	ErrGetMessage      = errors.New("get commit message")
 	ErrGetChangedFiles = errors.New("get changed files")
 	ErrShaLength       = errors.New("sha length must be greater than 0")
+	ErrSkip            = errors.New("skip commit")
 )
 
 type Violation struct {
@@ -24,7 +25,7 @@ type Git interface {
 	FilesChanged(ctx context.Context, sha string) ([]string, error)
 }
 type ScopeParser interface {
-	Parse(message string) string
+	Parse(message string) []string
 }
 type OutsiderFinder interface {
 	Find(scope string, files []string) []Outsider
@@ -75,7 +76,7 @@ func NewValidator(cfg Config, options Options) (*Validator, error) {
 	}
 
 	if scopeParser == nil {
-		scopeParser = NewDefaultScopeParser(cfg.ScopeRegex)
+		scopeParser = NewDefaultScopeParser(cfg.ScopeRegex, cfg.ScopeSeparator)
 	}
 
 	if shaLength == 0 {
@@ -104,49 +105,81 @@ func (v *Validator) Validate(ctx context.Context, from, to string) ([]Violation,
 	var violations []Violation
 
 	for _, sha := range shas {
-		message, err := v.git.Message(ctx, sha)
+		violation, err := v.checkCommit(ctx, sha)
+		if errors.Is(err, ErrSkip) {
+			continue
+		}
+
 		if err != nil {
-			return nil, fmt.Errorf("%w sha=%s: %w", ErrGetMessage, sha, err)
+			return nil, err
 		}
 
-		if message == "" {
-			v.logger.Debug("no message, skip", "sha", sha)
-
-			continue
-		}
-
-		scope := v.scopeParser.Parse(message)
-		if scope == "" {
-			v.logger.Debug("no scope, skip", "sha", sha, "message", message)
-
-			continue
-		}
-
-		files, err := v.git.FilesChanged(ctx, sha)
-		if err != nil {
-			return nil, fmt.Errorf("%w sha=%s, commit=%s: %w", ErrGetChangedFiles, sha, message, err)
-		}
-
-		if len(files) == 0 {
-			v.logger.Debug("no files changed, skip", "sha", sha)
-
-			continue
-		}
-
-		outsiders := v.outsiderFinder.Find(scope, files)
-		if len(outsiders) > 0 {
-			truncatedSHA := sha
-			if len(truncatedSHA) > v.shaLength {
-				truncatedSHA = truncatedSHA[:v.shaLength]
-			}
-
-			violations = append(violations, Violation{
-				SHA:       truncatedSHA,
-				Header:    message,
-				Outsiders: outsiders,
-			})
-		}
+		violations = append(violations, *violation)
 	}
 
 	return violations, nil
+}
+
+func (v *Validator) checkCommit(ctx context.Context, sha string) (*Violation, error) {
+	message, err := v.git.Message(ctx, sha)
+	if err != nil {
+		return nil, fmt.Errorf("%w sha=%s: %w", ErrGetMessage, sha, err)
+	}
+
+	if message == "" {
+		v.logger.Debug("no message, skip", "sha", sha)
+
+		return nil, fmt.Errorf("%w: empty message", ErrSkip)
+	}
+
+	scopes := v.scopeParser.Parse(message)
+	if len(scopes) == 0 {
+		v.logger.Debug("no scope, skip", "sha", sha, "message", message)
+
+		return nil, fmt.Errorf("%w: no scope", ErrSkip)
+	}
+
+	files, err := v.git.FilesChanged(ctx, sha)
+	if err != nil {
+		return nil, fmt.Errorf("%w sha=%s, commit=%s: %w", ErrGetChangedFiles, sha, message, err)
+	}
+
+	if len(files) == 0 {
+		v.logger.Debug("no files changed, skip", "sha", sha)
+
+		return nil, fmt.Errorf("%w: no files", ErrSkip)
+	}
+
+	allOutsiders := findOutsiders(v.outsiderFinder, scopes, files)
+	if len(allOutsiders) == 0 {
+		return nil, fmt.Errorf("%w: no outsiders", ErrSkip)
+	}
+
+	truncatedSHA := sha
+	if len(truncatedSHA) > v.shaLength {
+		truncatedSHA = truncatedSHA[:v.shaLength]
+	}
+
+	return &Violation{
+		SHA:       truncatedSHA,
+		Header:    message,
+		Outsiders: allOutsiders,
+	}, nil
+}
+
+func findOutsiders(finder OutsiderFinder, scopes []string, files []string) []Outsider {
+	seen := make(map[string]bool)
+
+	var allOutsiders []Outsider
+
+	for _, scope := range scopes {
+		for _, o := range finder.Find(scope, files) {
+			if !seen[o.File] {
+				seen[o.File] = true
+				allOutsiders = append(allOutsiders, o)
+			}
+		}
+	}
+
+	return allOutsiders
 }

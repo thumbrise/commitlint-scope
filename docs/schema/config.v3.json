@@ -10,6 +10,10 @@
       "format": "regex",
       "pattern": "\\(\\?P<scope>"
     },
+    "scopeSeparator": {
+      "description": "Character used to separate multiple scopes within the parentheses. Default: ','. Example: 'feat(api, db): message' with separator ',' yields scopes ['api', 'db'].",
+      "type": "string"
+    },
     "patterns": {
       "description": "List of pattern rules. Each rule maps a list of scope names to a list of glob patterns.",
       "type": "array",

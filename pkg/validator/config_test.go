@@ -14,12 +14,13 @@ func TestLoadConfig(t *testing.T) {
 	defaultRegexStr := `^[a-z]+(?:\((?P<scope>[^)]+)\))?!?:\s`
 
 	tests := []struct {
-		name         string
-		yaml         string
-		wantRegexNil bool
-		wantRegex    string
-		wantPatterns []validator.PatternItem
-		wantErr      error
+		name          string
+		yaml          string
+		wantRegexNil  bool
+		wantRegex     string
+		wantSeparator string
+		wantPatterns  []validator.PatternItem
+		wantErr       error
 	}{
 		{
 			name:      "no config file",
@@ -69,6 +70,12 @@ patterns:
 			},
 		},
 		{
+			name:          "custom scopeSeparator only",
+			yaml:          "scopeSeparator: '|'\n",
+			wantRegex:     defaultRegexStr,
+			wantSeparator: "|",
+		},
+		{
 			name:    "malformed config",
 			yaml:    "[[invalid",
 			wantErr: validator.ErrConfigRead,
@@ -110,6 +117,10 @@ patterns:
 			}
 
 			assert.Equal(t, tt.wantPatterns, cfg.Patterns)
+
+			if tt.wantSeparator != "" {
+				assert.Equal(t, tt.wantSeparator, cfg.ScopeSeparator)
+			}
 		})
 	}
 }

@@ -21,6 +21,9 @@ const InitConfigData = `#$schema: https://github.com/thumbrise/commitlint-scope/
 # Scope parsing customization. Not required, if you follow common conventional header. In example: 'type!(scope): subject'
 #scopeRegex: ^[a-z]+(?:\((?P<scope>[^)]+)\))?!?:\s
 
+# Character used to separate multiple scopes within parentheses. Default: ',' (e.g. 'feat(api, db): msg')
+#scopeSeparator: ","
+
 # Patterns list: each item specifies a list of scopes and the corresponding file glob patterns.
 patterns:
   - scopes: ["auth"]
