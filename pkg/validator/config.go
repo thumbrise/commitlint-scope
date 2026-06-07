@@ -21,8 +21,9 @@ type PatternItem struct {
 }
 
 type Config struct {
-	ScopeRegex *regexp.Regexp `koanf:"scopeRegex"`
-	Patterns   []PatternItem  `koanf:"patterns"`
+	ScopeRegex     *regexp.Regexp `koanf:"scopeRegex"`
+	ScopeSeparator string         `koanf:"scopeSeparator"`
+	Patterns       []PatternItem  `koanf:"patterns"`
 }
 
 var (
@@ -35,6 +36,7 @@ func LoadConfig() (Config, error) {
 
 	defaultRegex := `^[a-z]+(?:\((?P<scope>[^)]+)\))?!?:\s`
 	_ = k.Set("scopeRegex", defaultRegex)
+	_ = k.Set("scopeSeparator", ",")
 
 	if err := k.Load(file.Provider(ConfigName), yaml.Parser()); err != nil {
 		if !os.IsNotExist(err) {
