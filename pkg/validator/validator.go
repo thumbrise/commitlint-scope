@@ -1,10 +1,12 @@
 package validator
 
 import (
+	"cmp"
 	"context"
 	"errors"
 	"fmt"
 	"log/slog"
+	"slices"
 )
 
 var (
@@ -194,6 +196,10 @@ func findOutsiders(finder OutsiderFinder, scopes []string, files []string) []Out
 	for _, o := range outsidersByFile {
 		result = append(result, o)
 	}
+
+	slices.SortFunc(result, func(a, b Outsider) int {
+		return cmp.Compare(a.File, b.File)
+	})
 
 	return result
 }

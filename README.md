@@ -122,7 +122,7 @@ patterns:
 ```
 
 Without a configuration file, each scope is used as a glob pattern by appending /**.
-Multiple scopes in a single commit are resolved independently — `feat(api, db): ...` will check files against patterns for both `api` and `db`. If a scope separator other than comma is used, set `scopeSeparator` in the config.
+Multiple scopes in a single commit use intersection semantics — a file is flagged as an outsider only if it fails to match **all** declared scopes' patterns. For example, `feat(api, db): ...` checks files against both `api` and `db` patterns; a file matching at least one scope's patterns passes. If a scope separator other than comma is used, set `scopeSeparator` in the config.
 
 For example:
 
@@ -130,7 +130,7 @@ For example:
 feat(auth, docs): Some subject
 ```
 
-Linter will check changed files against glob patterns `auth/**` and `docs/**`.
+Linter will check changed files against glob patterns `auth/**` and `docs/**`. A file that matches at least one scope's patterns passes; only files failing both scopes are flagged as outsiders.
 
 
 ## CI

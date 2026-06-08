@@ -23,11 +23,13 @@ func TestLoadConfig(t *testing.T) {
 		wantErr       error
 	}{
 		{
-			name:      "no config file",
-			wantRegex: defaultRegexStr,
+			name:          "no config file",
+			wantRegex:     defaultRegexStr,
+			wantSeparator: ",",
 		},
 		{
-			name: "patterns with default regex",
+			name:          "patterns with default regex",
+			wantSeparator: ",",
 			yaml: `patterns:
   - scopes: ["api"]
     files: ["api/*"]
@@ -41,13 +43,15 @@ func TestLoadConfig(t *testing.T) {
 			},
 		},
 		{
-			name: "custom scopeRegex only",
+			name:          "custom scopeRegex only",
+			wantSeparator: ",",
 			yaml: `scopeRegex: '^(feat|fix):'
 `,
 			wantRegex: `^(feat|fix):`,
 		},
 		{
-			name: "both patterns and custom scopeRegex",
+			name:          "both patterns and custom scopeRegex",
+			wantSeparator: ",",
 			yaml: `scopeRegex: '^(feat|fix):'
 patterns:
   - scopes: ["api"]
@@ -59,7 +63,8 @@ patterns:
 			},
 		},
 		{
-			name: "patterns with dots inside scopes",
+			name:          "patterns with dots inside scopes",
+			wantSeparator: ",",
 			yaml: `patterns:
   - scopes: ["rail.v1.json"]
     files: ["**/rail.v1.json"]
@@ -118,9 +123,7 @@ patterns:
 
 			assert.Equal(t, tt.wantPatterns, cfg.Patterns)
 
-			if tt.wantSeparator != "" {
-				assert.Equal(t, tt.wantSeparator, cfg.ScopeSeparator)
-			}
+			assert.Equal(t, tt.wantSeparator, cfg.ScopeSeparator)
 		})
 	}
 }
