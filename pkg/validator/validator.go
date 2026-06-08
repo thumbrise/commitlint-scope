@@ -168,18 +168,32 @@ func (v *Validator) checkCommit(ctx context.Context, sha string) (*Violation, er
 }
 
 func findOutsiders(finder OutsiderFinder, scopes []string, files []string) []Outsider {
-	seen := make(map[string]bool)
+	if len(scopes) == 0 {
+		return nil
+	}
 
-	var allOutsiders []Outsider
+	outsidersByFile := make(map[string]Outsider)
+	for _, o := range finder.Find(scopes[0], files) {
+		outsidersByFile[o.File] = o
+	}
 
-	for _, scope := range scopes {
+	for _, scope := range scopes[1:] {
+		validForScope := make(map[string]bool)
 		for _, o := range finder.Find(scope, files) {
-			if !seen[o.File] {
-				seen[o.File] = true
-				allOutsiders = append(allOutsiders, o)
+			validForScope[o.File] = true
+		}
+
+		for file := range outsidersByFile {
+			if !validForScope[file] {
+				delete(outsidersByFile, file)
 			}
 		}
 	}
 
-	return allOutsiders
+	result := make([]Outsider, 0, len(outsidersByFile))
+	for _, o := range outsidersByFile {
+		result = append(result, o)
+	}
+
+	return result
 }

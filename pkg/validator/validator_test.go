@@ -14,7 +14,8 @@ type TestableCommit struct {
 	sha, message   string
 	files          []string
 	scopes         []string
-	outsidersFiles []string
+	outsidersFiles []string            // expected final outsiders (intersection)
+	scopeOutsiders map[string][]string // per-scope outsiders returned by Find mock
 	messageErr     error
 }
 
@@ -84,10 +85,11 @@ func TestValidator_Scenarios(t *testing.T) {
 	const shaLength = 7
 
 	tests := []struct {
-		name           string
-		commits        []TestableCommit
-		wantViolations int
-		wantErr        bool
+		name              string
+		commits           []TestableCommit
+		wantViolations    int
+		wantOutsiderFiles []string
+		wantErr           bool
 	}{
 		{
 			name: "TestableCommit without scope skipped",
@@ -128,17 +130,22 @@ func TestValidator_Scenarios(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "multi scope with outsiders",
+			name: "multi scope with outsiders intersection",
 			commits: []TestableCommit{
 				{
-					sha:            "ggg7777ggg",
-					message:        "feat(api, db): add endpoint",
-					files:          []string{"api/handler.go", "db/schema.sql", "core/other.go", "README.md"},
-					scopes:         []string{"api", "db"},
+					sha:     "ggg7777ggg",
+					message: "feat(api, db): add endpoint",
+					files:   []string{"api/handler.go", "db/schema.sql", "core/other.go", "README.md"},
+					scopes:  []string{"api", "db"},
+					scopeOutsiders: map[string][]string{
+						"api": {"db/schema.sql", "core/other.go", "README.md"},
+						"db":  {"api/handler.go", "core/other.go", "README.md"},
+					},
 					outsidersFiles: []string{"core/other.go", "README.md"},
 				},
 			},
-			wantViolations: 1,
+			wantViolations:    1,
+			wantOutsiderFiles: []string{"core/other.go", "README.md"},
 		},
 	}
 
@@ -165,16 +172,33 @@ func TestValidator_Scenarios(t *testing.T) {
 
 			violations, err := v.Validate(context.Background(), "main", "feature-branch")
 
-			if tt.wantErr && err == nil {
-				t.Fatal("expected error, got nil")
+			if tt.wantErr {
+				if err == nil {
+					t.Fatal("expected error, got nil")
+				}
+
+				return
 			}
 
-			if !tt.wantErr && err != nil {
+			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}
 
 			if len(violations) != tt.wantViolations {
 				t.Errorf("got %d violations, want %d", len(violations), tt.wantViolations)
+
+				return
+			}
+
+			if len(tt.wantOutsiderFiles) > 0 {
+				gotFiles := make([]string, 0, len(tt.wantOutsiderFiles))
+				for _, o := range violations[0].Outsiders {
+					gotFiles = append(gotFiles, o.File)
+				}
+
+				if !sameSlice(t, gotFiles, tt.wantOutsiderFiles) {
+					t.Errorf("outsiders = %v, want %v", gotFiles, tt.wantOutsiderFiles)
+				}
 			}
 		})
 	}
@@ -226,10 +250,13 @@ func SetupExpectations(t *testing.T, commits []TestableCommit, git *validator.Mo
 			continue
 		}
 
-		outsiders := outsidersFromFiles(c.outsidersFiles)
-
 		for _, scope := range c.scopes {
-			outsider.EXPECT().Find(scope, c.files).Return(outsiders)
+			scopeFiles, ok := c.scopeOutsiders[scope]
+			if !ok {
+				scopeFiles = c.outsidersFiles
+			}
+
+			outsider.EXPECT().Find(scope, c.files).Return(outsidersFromFiles(scopeFiles))
 		}
 	}
 }
