@@ -108,6 +108,42 @@ func TestDefaultOutsiderFinder_Find(t *testing.T) {
 			wantOutsiders: []string{"db/docs/readme.md"},
 		},
 		{
+			name: "globstar at start matches root-level files (gobwas workaround)",
+			patterns: []validator.OutsiderFinderPattern{
+				{
+					Scopes: []string{"deps"},
+					Files:  []string{"**/go.mod"},
+				},
+			},
+			scope:         "deps",
+			files:         []string{"go.mod", "go.sum", "op/file.go", "subdir/go.mod"},
+			wantOutsiders: []string{"go.sum", "op/file.go"},
+		},
+		{
+			name: "globstar at start with wildcard matches root-level files",
+			patterns: []validator.OutsiderFinderPattern{
+				{
+					Scopes: []string{"docs"},
+					Files:  []string{"**/*.md"},
+				},
+			},
+			scope:         "docs",
+			files:         []string{"README.md", "CHANGELOG.md", "api/readme.md", "main.go"},
+			wantOutsiders: []string{"main.go"},
+		},
+		{
+			name: "globstar at start with dotted scope matches root-level file",
+			patterns: []validator.OutsiderFinderPattern{
+				{
+					Scopes: []string{"v1.json"},
+					Files:  []string{"**/rail.v1.json"},
+				},
+			},
+			scope:         "v1.json",
+			files:         []string{"rail.v1.json", "internal/rail.v1.json", "core/other.go"},
+			wantOutsiders: []string{"core/other.go"},
+		},
+		{
 			name: "multiple scopes sharing same patterns",
 			patterns: []validator.OutsiderFinderPattern{
 				{

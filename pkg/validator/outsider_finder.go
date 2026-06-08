@@ -94,6 +94,12 @@ func (f *DefaultOutsiderFinder) matchesAny(name string, globs []glob.Glob) bool 
 		}
 	}
 
+	for _, g := range globs {
+		if g.Match("./" + name) {
+			return true
+		}
+	}
+
 	return false
 }
 
